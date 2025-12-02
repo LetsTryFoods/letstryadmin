@@ -8,12 +8,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Package, User, Settings, LayoutDashboard } from "lucide-react"
 
 const items = [
   {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
     title: "Products",
     url: "/dashboard/products",
+    icon: Package,
   },
+
 ]
 
 export function AppSidebar() {
@@ -28,6 +36,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
+                      <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>

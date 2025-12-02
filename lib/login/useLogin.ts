@@ -17,7 +17,6 @@ export const useLogin = () => {
       const token = data.adminLogin
       if (token) {
         localStorage.setItem('token', token)
-        console.log('✅ Token received:', token.substring(0, 20) + '...')
       }
     },
     onError: (error: any) => {
