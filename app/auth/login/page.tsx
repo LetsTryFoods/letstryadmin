@@ -13,15 +13,24 @@ export default function LoginPage() {
   const loginMutation = useLogin()
 
   const onSubmit = async (data: LoginData) => {
+    
     try {
       const response = await loginMutation.mutateAsync(data)
 
-      document.cookie = `token=${response.token}; path=/; max-age=86400`
+      document.cookie = `token=${response.token}; path=/; max-age=86400` // 1 day expiration dummy
 
+      localStorage.setItem('token', response.token)
+      
       toast.success('Login successful!')
-      window.location.href = '/'
+      window.location.href = '/dashboard'
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed')
+      
+      // Handle GraphQL errors
+      const errorMessage = error.message || 
+                          error.response?.data?.errors?.[0]?.message || 
+                          error.response?.data?.message || 
+                          'Login failed'
+      toast.error(errorMessage)
     }
   }
 
