@@ -1,5 +1,5 @@
-import { useMutation } from '@tanstack/react-query'
-import api from '@/lib/axios'
+import { useMutation } from '@apollo/client/react'
+import { ADMIN_LOGIN } from '@/lib/graphql/auth'
 
 export interface LoginData {
   email: string
@@ -12,43 +12,18 @@ export interface LoginResponse {
 }
 
 export const useLogin = () => {
-  return useMutation({
-    mutationFn: async (data: LoginData): Promise<LoginResponse> => {
-
-      const requestBody = {
-        query: `
-          mutation AdminLogin {
-            adminLogin(email: "${data.email}", password: "${data.password}")
-          }
-        `
-      }
-      
-      const response = await api.post('/graphql', requestBody, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      
-    
-      
-      // Check for GraphQL errors
-      if (response.data.errors) {
-        throw new Error(response.data.errors[0].message)
-      }
-      
-      // GraphQL wraps response in data.data.mutationName
-      const token = response.data.data?.adminLogin
-      
-      if (!token) {
-        throw new Error('No token received from server')
-      }
-      
-      console.log('✅ Token received:', token.substring(0, 20) + '...')
-      
-      return {
-        token: token,
-        user: null
+  const [mutate, { data, loading, error }] = useMutation(ADMIN_LOGIN, {
+    onCompleted: (data: any) => {
+      const token = data.adminLogin
+      if (token) {
+        localStorage.setItem('token', token)
+        console.log('✅ Token received:', token.substring(0, 20) + '...')
       }
     },
+    onError: (error: any) => {
+      console.error('Login error:', error)
+    }
   })
+  
+  return [mutate, { data, loading, error }] as const
 }

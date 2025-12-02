@@ -10,16 +10,24 @@ import { useRegister, RegisterData } from '@/lib/register/useRegister'
 
 export default function RegisterPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterData>()
-  const registerMutation = useRegister()
+  const [registerMutation, { loading }] = useRegister()
 
   const onSubmit = async (data: RegisterData) => {
     try {
-      await registerMutation.mutateAsync(data)
+      const response = await registerMutation({
+        variables: {
+          email: data.email,
+          password: data.password
+        }
+      })
 
+      console.log('Register response:', response)
       toast.success('Registration successful!')
       window.location.href = '/auth/login'
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed')
+      console.error('Registration error:', error)
+      const errorMessage = error.message || 'Registration failed'
+      toast.error(errorMessage)
     }
   }
 
@@ -59,9 +67,9 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={registerMutation.isPending}
+              disabled={loading}
             >
-              {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
 

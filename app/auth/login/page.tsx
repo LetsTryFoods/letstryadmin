@@ -10,26 +10,26 @@ import { useLogin, LoginData } from '@/lib/login/useLogin'
 
 export default function LoginPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
-  const loginMutation = useLogin()
+  const [login, { loading }] = useLogin()
 
   const onSubmit = async (data: LoginData) => {
-    
     try {
-      const response = await loginMutation.mutateAsync(data)
+      const response = await login({
+        variables: {
+          email: data.email,
+          password: data.password
+        }
+      })
 
-      document.cookie = `token=${response.token}; path=/; max-age=86400` // 1 day expiration dummy
-
-      localStorage.setItem('token', response.token)
+      const token = (response.data as any)?.adminLogin
       
-      toast.success('Login successful!')
-      window.location.href = '/dashboard'
+      if (token) {
+        document.cookie = `token=${token}; path=/; max-age=86400`
+        toast.success('Login successful!')
+        window.location.href = '/dashboard'
+      }
     } catch (error: any) {
-      
-      // Handle GraphQL errors
-      const errorMessage = error.message || 
-                          error.response?.data?.errors?.[0]?.message || 
-                          error.response?.data?.message || 
-                          'Login failed'
+      const errorMessage = error.message || 'Login failed'
       toast.error(errorMessage)
     }
   }
@@ -70,9 +70,9 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loginMutation.isPending}
+              disabled={loading}
             >
-              {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+              {loading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
 
