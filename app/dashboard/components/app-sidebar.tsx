@@ -13,7 +13,20 @@ import {
 } from "@/components/ui/sidebar"
 import { LogOut, Image, FolderTree } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { Package, User, Settings, LayoutDashboard } from "lucide-react"
+import { Package, User, Settings, LayoutDashboard, Truck, RefreshCcw, FileText, Trash2 } from "lucide-react"
+import { usePolicies, useDeletePolicy } from "@/lib/policies/usePolicies"
+import { useState } from "react"
+import { toast } from "react-hot-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const items = [
   {
@@ -40,12 +53,39 @@ const items = [
 
 export function AppSidebar() {
   const router = useRouter()
+  const { data: policiesData } = usePolicies()
+  const { mutate: deletePolicy } = useDeletePolicy()
+  const policies = (policiesData as any)?.policies || []
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [policyToDelete, setPolicyToDelete] = useState<any>(null)
 
   const handleLogout = () => {
-
     localStorage.removeItem('token')
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
     router.push('/auth/login')
+  }
+
+  const handleDeleteClick = (policy: any) => {
+    setPolicyToDelete(policy)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!policyToDelete) return
+
+    try {
+      await deletePolicy({
+        variables: { id: policyToDelete._id }
+      })
+      toast.success('Policy deleted successfully')
+      setDeleteDialogOpen(false)
+      setPolicyToDelete(null)
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast.error('Failed to delete policy')
+    }
   }
 
   return (
@@ -68,6 +108,40 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="flex justify-between items-center pr-2">
+            Policies
+            <a href="/dashboard/policies/create" className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90">
+              + Add
+            </a>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {policies.map((policy: any) => (
+                <SidebarMenuItem key={policy._id} className="group/item">
+                  <SidebarMenuButton asChild>
+                    <a href={`/dashboard/policies/${policy.title}`} className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        <span>{policy.title}</span>
+                      </div>
+                    </a>
+                  </SidebarMenuButton>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleDeleteClick(policy)
+                    }}
+                    className="absolute right-2 top-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -79,6 +153,23 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the policy "{policyToDelete?.title}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sidebar>
   )
 }

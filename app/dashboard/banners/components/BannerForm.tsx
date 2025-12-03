@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Checkbox } from "@/components/ui/checkbox"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { bannerFormSchema } from "@/lib/validation/banner.schema"
+import { bannerFormSchema } from "@/lib/validations/banner.schema"
 import { z } from "zod"
 import { ImageUpload } from "@/components/custom/image-upload"
 
