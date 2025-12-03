@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { ImageUpload } from "@/components/custom/image-upload"
 import { WysiwygEditor } from "@/components/custom/wysiwyg-editor"
+import { TagInput } from "@/components/custom/tag-input"
 import { productFormSchema, ProductFormValues } from "@/lib/validations/product"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCategories } from "@/lib/categories/useCategories"
@@ -110,6 +111,8 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
         mpn: data.mpn || undefined,
         allergens: data.allergens || undefined,
         rating: data.rating || undefined,
+        keywords: data.keywords.filter(k => k !== ""),
+        tags: data.tags.filter(t => t !== ""),
         availabilityStatus: data.availabilityStatus ? 'in_stock' : 'out_of_stock',
         images: formattedImages.length > 0 ? formattedImages : (initialData?.images?.map(img => ({ url: img.url, alt: img.alt })) || []),
         thumbnailUrl: formattedImages[0]?.url || initialData?.thumbnailUrl || "", 
@@ -166,6 +169,20 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
               <FormItem>
                 <FormLabel>SKU *</FormLabel>
                 <FormControl><Input {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="gtin" render={({ field }) => (
+              <FormItem>
+                <FormLabel>GTIN</FormLabel>
+                <FormControl><Input {...field} placeholder="EAN/UPC" /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="mpn" render={({ field }) => (
+              <FormItem>
+                <FormLabel>MPN</FormLabel>
+                <FormControl><Input {...field} placeholder="Manufacturer Part Number" /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
@@ -250,11 +267,50 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
               </FormItem>
             )} />
           </div>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <FormField control={form.control} name="currency" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="INR">INR</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="discountSource" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Discount Source *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select source" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="product">Manual (Product)</SelectItem>
+                    <SelectItem value="auto">Auto</SelectItem>
+                    <SelectItem value="seasonal">Seasonal</SelectItem>
+                    <SelectItem value="loyalty">Loyalty</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
+          </div>
         </div>
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Dimensions</h3>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-5 gap-4">
             <FormField control={form.control} name="length" render={({ field }) => (
               <FormItem>
                 <FormLabel>Length *</FormLabel>
@@ -280,6 +336,25 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
               <FormItem>
                 <FormLabel>Weight *</FormLabel>
                 <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="weightUnit" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unit *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Unit" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="g">g</SelectItem>
+                    <SelectItem value="kg">kg</SelectItem>
+                    <SelectItem value="ml">ml</SelectItem>
+                    <SelectItem value="L">L</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )} />
@@ -311,6 +386,41 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
               <FormMessage />
             </FormItem>
           )} />
+          <FormField control={form.control} name="allergens" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Allergens</FormLabel>
+              <FormControl><Textarea {...field} rows={2} placeholder="e.g. Peanuts, Milk, Soy" /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField control={form.control} name="keywords" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Keywords</FormLabel>
+                <FormControl>
+                  <TagInput 
+                    value={field.value || []} 
+                    onChange={field.onChange}
+                    placeholder="Type keyword and press Enter" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="tags" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tags</FormLabel>
+                <FormControl>
+                  <TagInput 
+                    value={field.value || []} 
+                    onChange={field.onChange}
+                    placeholder="Type tag and press Enter" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="stockQuantity" render={({ field }) => (
               <FormItem>

@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { Button } from "@/components/ui/button"
+import { Trash2 } from "lucide-react"
 import Uppy from '@uppy/core'
 import Dashboard from '@uppy/dashboard'
 import Compressor from '@uppy/compressor'
@@ -40,6 +42,35 @@ export function ImageUpload({ onImagesChange, initialImages = [], maxFiles = 10,
 
   const [uploadedImages, setUploadedImages] = useState<UploadedFile[]>([])
   const [altTexts, setAltTexts] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (initialImages.length > 0 && uploadedImages.length === 0) {
+      const initialUploadedFiles: UploadedFile[] = initialImages.map((img, index) => ({
+        file: {
+          name: `existing-${index}-${Date.now()}`,
+          type: 'image/unknown',
+          size: 0,
+          lastModified: Date.now(),
+          webkitRelativePath: '',
+          slice: () => new Blob(),
+          stream: () => new ReadableStream(),
+          text: () => Promise.resolve(''),
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+        } as unknown as File,
+        alt: img.alt || '',
+        preview: img.url,
+        finalUrl: img.url,
+        key: img.url,
+      }))
+      setUploadedImages(initialUploadedFiles)
+      
+      const alts: Record<string, string> = {}
+      initialUploadedFiles.forEach(f => {
+        alts[f.file.name] = f.alt
+      })
+      setAltTexts(alts)
+    }
+  }, [initialImages])
 
   useEffect(() => {
     if (dashboardRef.current && !uppy.getPlugin('Dashboard')) {
@@ -135,6 +166,15 @@ export function ImageUpload({ onImagesChange, initialImages = [], maxFiles = 10,
     }))
   }
 
+  const handleRemoveImage = (fileName: string) => {
+    setUploadedImages(prev => prev.filter(img => img.file.name !== fileName))
+    setAltTexts(prev => {
+      const newAlts = { ...prev }
+      delete newAlts[fileName]
+      return newAlts
+    })
+  }
+
   return (
     <div className="space-y-4 w-full">
       <div ref={dashboardRef} className="border rounded-lg w-full" />
@@ -147,7 +187,18 @@ export function ImageUpload({ onImagesChange, initialImages = [], maxFiles = 10,
           <h4 className="font-medium">Uploaded Images & Alt Text</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {uploadedImages.map((image, index) => (
-              <div key={image.file.name} className="border rounded-lg p-3 space-y-2">
+              <div key={image.file.name} className="border rounded-lg p-3 space-y-2 relative group">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => handleRemoveImage(image.file.name)}
+                    type="button"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
                 <img
                   src={image.preview}
                   alt={`Preview ${index + 1}`}

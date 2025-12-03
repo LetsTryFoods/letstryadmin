@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react"
 import { useState } from "react"
+import Link from "next/link"
 import { useProducts, useCreateProduct, useUpdateProduct, useArchiveProduct, useUnarchiveProduct, useDeleteProduct } from "@/lib/products/useProducts"
 import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/column-selector"
 import { ImagePreviewDialog } from "@/app/dashboard/components/image-preview-dialog"
@@ -219,7 +220,11 @@ export default function ProductsPage() {
                       <TableRow key={product._id}>
                         {selectedColumns.map(columnKey => (
                           <TableCell key={columnKey}>
-                            {columnKey === 'isArchived' ? (
+                            {columnKey === 'name' ? (
+                              <Link href={`/dashboard/products/${product._id}`} className="font-medium text-blue-600 hover:underline">
+                                {product.name}
+                              </Link>
+                            ) : columnKey === 'isArchived' ? (
                               <span className={product.isArchived ? "text-orange-600" : "text-green-600"}>
                                 {product.isArchived ? 'Archived' : 'Active'}
                               </span>

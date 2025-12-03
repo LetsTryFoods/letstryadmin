@@ -1,6 +1,7 @@
 'use client'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import Link from "next/link"
 import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/column-selector"
 import { Pagination } from "@/app/dashboard/components/pagination"
 import { ProductActions } from "./product-actions"
@@ -109,7 +110,11 @@ export function ProductTable({
                     <TableRow key={product._id}>
                       {selectedColumns.map(columnKey => (
                         <TableCell key={columnKey}>
-                          {columnKey === 'isArchived' ? (
+                          {columnKey === 'name' ? (
+                            <Link href={`/dashboard/products/${product._id}`} className="font-medium text-blue-600 hover:underline">
+                              {product.name}
+                            </Link>
+                          ) : columnKey === 'isArchived' ? (
                             <span className={product.isArchived ? "text-orange-600" : "text-green-600"}>
                               {product.isArchived ? 'Archived' : 'Active'}
                             </span>
