@@ -107,10 +107,7 @@ export const useCategoryBySlug = (slug: string, includeArchived: boolean = false
 
 export const useCreateCategory = () => {
   const [mutate, { loading, error }] = useMutation(CREATE_CATEGORY, {
-    refetchQueries: [
-      { query: GET_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: false } },
-      { query: GET_ROOT_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: false } }
-    ],
+    refetchQueries: ['GetCategories', 'GetRootCategories'],
     onError: (error: any) => {
       console.error('Create category error:', error)
     }
@@ -121,10 +118,7 @@ export const useCreateCategory = () => {
 
 export const useUpdateCategory = () => {
   const [mutate, { loading, error }] = useMutation(UPDATE_CATEGORY, {
-    refetchQueries: [
-      { query: GET_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: false } },
-      { query: GET_ROOT_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: false } }
-    ],
+    refetchQueries: ['GetCategories', 'GetRootCategories'],
     onError: (error: any) => {
       console.error('Update category error:', error)
     }
@@ -135,10 +129,7 @@ export const useUpdateCategory = () => {
 
 export const useArchiveCategory = () => {
   const [mutate, { loading, error }] = useMutation(ARCHIVE_CATEGORY, {
-    refetchQueries: [
-      { query: GET_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: false } },
-      { query: GET_ROOT_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: false } }
-    ],
+    refetchQueries: ['GetCategories', 'GetRootCategories'],
     onError: (error: any) => {
       console.error('Archive category error:', error)
     }
@@ -149,10 +140,7 @@ export const useArchiveCategory = () => {
 
 export const useUnarchiveCategory = () => {
   const [mutate, { loading, error }] = useMutation(UNARCHIVE_CATEGORY, {
-    refetchQueries: [
-      { query: GET_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: true } },
-      { query: GET_ROOT_CATEGORIES, variables: { pagination: { page: 1, limit: 100 }, includeArchived: true } }
-    ],
+    refetchQueries: ['GetCategories', 'GetRootCategories'],
     onError: (error: any) => {
       console.error('Unarchive category error:', error)
     }

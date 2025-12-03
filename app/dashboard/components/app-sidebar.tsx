@@ -42,13 +42,9 @@ export function AppSidebar() {
   const router = useRouter()
 
   const handleLogout = () => {
-    // Clear token from localStorage
+
     localStorage.removeItem('token')
-    
-    // Clear token from cookies
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-    
-    // Redirect to login page
     router.push('/auth/login')
   }
 

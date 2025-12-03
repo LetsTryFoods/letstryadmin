@@ -4,22 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Pencil, Trash2, Archive, ArchiveRestore, Plus, Minus } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react"
 import { useState } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { useProducts, useCreateProduct, useUpdateProduct, useArchiveProduct, useUnarchiveProduct, useDeleteProduct } from "@/lib/products/useProducts"
 import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/column-selector"
 import { ImagePreviewDialog } from "@/app/dashboard/components/image-preview-dialog"
 import { Pagination } from "@/app/dashboard/components/pagination"
+import { ProductForm } from "./_components/product-form"
 
 const allColumns: ColumnDefinition[] = [
   { key: "_id", label: "ID" },
@@ -169,7 +162,7 @@ export default function ProductsPage() {
             <DialogTrigger asChild>
               <Button onClick={handleAddProduct}>Add Product</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-7xl w-[95vw] max-h-[90vh] overflow-y-auto sm:max-w-7xl">
               <DialogHeader>
                 <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
               </DialogHeader>
@@ -227,10 +220,9 @@ export default function ProductsPage() {
                         {selectedColumns.map(columnKey => (
                           <TableCell key={columnKey}>
                             {columnKey === 'isArchived' ? (
-                              <Switch
-                                checked={product.isArchived}
-                                onCheckedChange={() => handleAction(product._id, product.isArchived ? 'unarchive' : 'archive', product.isArchived)}
-                              />
+                              <span className={product.isArchived ? "text-orange-600" : "text-green-600"}>
+                                {product.isArchived ? 'Archived' : 'Active'}
+                              </span>
                             ) : columnKey === 'thumbnailUrl' ? (
                               product.thumbnailUrl ? (
                                 <button
@@ -250,10 +242,9 @@ export default function ProductsPage() {
                             ) : columnKey === 'isVegetarian' || columnKey === 'isGlutenFree' ? (
                               product[columnKey] ? '✓' : '✗'
                             ) : columnKey === 'availabilityStatus' ? (
-                              <Switch
-                                checked={typeof product.availabilityStatus === 'boolean' ? product.availabilityStatus : product.availabilityStatus === 'in_stock'}
-                                onCheckedChange={() => handleStatusToggle(product._id, typeof product.availabilityStatus === 'boolean' ? product.availabilityStatus : product.availabilityStatus === 'in_stock')}
-                              />
+                              <span className={typeof product.availabilityStatus === 'boolean' ? (product.availabilityStatus ? 'text-green-600' : 'text-red-600') : (product.availabilityStatus === 'in_stock' ? 'text-green-600' : 'text-red-600')}>
+                                {typeof product.availabilityStatus === 'boolean' ? (product.availabilityStatus ? 'In Stock' : 'Out of Stock') : (product.availabilityStatus === 'in_stock' ? 'In Stock' : 'Out of Stock')}
+                              </span>
                             ) : (
                               <div className="max-w-[200px] truncate">
                                 {String(product[columnKey as keyof typeof product] || '-')}
@@ -354,335 +345,4 @@ export default function ProductsPage() {
   )
 }
 
-const productFormSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().optional(),
-  description: z.string().min(1),
-  categoryId: z.string().min(1),
-  brand: z.string().min(1),
-  sku: z.string().min(1),
-  gtin: z.string().optional(),
-  mpn: z.string().optional(),
-  images: z.array(z.object({
-    url: z.string().min(1),
-    alt: z.string().min(1)
-  })).min(1),
-  thumbnailUrl: z.string().min(1),
-  price: z.coerce.number().min(0),
-  mrp: z.coerce.number().min(0),
-  discountPercent: z.coerce.number().min(0).max(100),
-  currency: z.string().default("INR"),
-  length: z.coerce.number().min(0),
-  height: z.coerce.number().min(0),
-  breadth: z.coerce.number().min(0),
-  weight: z.coerce.number().min(0),
-  weightUnit: z.string().default("g"),
-  packageSize: z.string().min(1),
-  ingredients: z.string().min(1),
-  allergens: z.string().optional(),
-  shelfLife: z.string().min(1),
-  isVegetarian: z.boolean().default(true),
-  isGlutenFree: z.boolean().default(false),
-  availabilityStatus: z.boolean().default(true),
-  stockQuantity: z.coerce.number().int().min(0).default(0),
-  rating: z.coerce.number().min(0).max(5).optional(),
-  ratingCount: z.coerce.number().int().min(0).default(0),
-  keywords: z.array(z.string()).default([]),
-  tags: z.array(z.string()).default([]),
-  discountSource: z.string().default("product"),
-})
 
-type ProductFormValues = z.infer<typeof productFormSchema>
-
-interface ProductFormProps {
-  onClose: () => void
-  initialData?: any | null
-  createProduct?: any
-  updateProduct?: any
-}
-
-function ProductForm({ onClose, initialData, createProduct, updateProduct }: ProductFormProps) {
-  const form = useForm({
-    // @ts-ignore - zod v4 compatibility issue
-    resolver: zodResolver(productFormSchema),
-    defaultValues: {
-      name: initialData?.name || "",
-      slug: initialData?.slug || "",
-      description: initialData?.description || "",
-      categoryId: initialData?.categoryId || "",
-      brand: initialData?.brand || "",
-      sku: initialData?.sku || "",
-      gtin: initialData?.gtin || "",
-      mpn: initialData?.mpn || "",
-      images: initialData?.images || [{ url: "", alt: "" }],
-      thumbnailUrl: initialData?.thumbnailUrl || "",
-      price: initialData?.price || 0,
-      mrp: initialData?.mrp || 0,
-      discountPercent: initialData?.discountPercent || 0,
-      currency: initialData?.currency || "INR",
-      length: initialData?.length || 0,
-      height: initialData?.height || 0,
-      breadth: initialData?.breadth || 0,
-      weight: initialData?.weight || 0,
-      weightUnit: initialData?.weightUnit || "g",
-      packageSize: initialData?.packageSize || "",
-      ingredients: initialData?.ingredients || "",
-      allergens: initialData?.allergens || "",
-      shelfLife: initialData?.shelfLife || "",
-      isVegetarian: initialData?.isVegetarian ?? true,
-      isGlutenFree: initialData?.isGlutenFree ?? false,
-      availabilityStatus: initialData?.availabilityStatus === 'in_stock' ? true : initialData?.availabilityStatus === 'out_of_stock' ? false : (initialData?.availabilityStatus ?? true),
-      stockQuantity: initialData?.stockQuantity || 0,
-      rating: initialData?.rating || undefined,
-      ratingCount: initialData?.ratingCount || 0,
-      keywords: initialData?.keywords || [],
-      tags: initialData?.tags || [],
-      discountSource: initialData?.discountSource || "product",
-    },
-  })
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "images"
-  })
-
-  const onSubmit = async (data: any) => {
-    try {
-      const formattedData = {
-        ...data,
-        slug: data.slug || undefined,
-        gtin: data.gtin || undefined,
-        mpn: data.mpn || undefined,
-        allergens: data.allergens || undefined,
-        rating: data.rating || undefined,
-        availabilityStatus: data.availabilityStatus ? 'in_stock' : 'out_of_stock',
-      }
-
-      if (initialData) {
-        await updateProduct({
-          variables: {
-            id: initialData._id,
-            input: formattedData
-          }
-        })
-      } else {
-        await createProduct({
-          variables: {
-            input: formattedData
-          }
-        })
-      }
-      onClose()
-    } catch (error) {
-      console.error("Failed to save product:", error)
-    }
-  }
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Basic Information</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="name" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name *</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="brand" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Brand *</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="sku" render={({ field }) => (
-              <FormItem>
-                <FormLabel>SKU *</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="categoryId" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category ID *</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-          </div>
-          <FormField control={form.control} name="description" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description *</FormLabel>
-              <FormControl><Textarea {...field} rows={3} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Images *</h3>
-            <Button type="button" variant="outline" size="sm" onClick={() => append({ url: "", alt: "" })}>
-              <Plus className="h-4 w-4 mr-2" /> Add
-            </Button>
-          </div>
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex gap-2">
-              <FormField control={form.control} name={`images.${index}.url`} render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>URL</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name={`images.${index}.alt`} render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Alt</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              {fields.length > 1 && (
-                <Button type="button" variant="destructive" size="icon" className="mt-8" onClick={() => remove(index)}>
-                  <Minus className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-          <FormField control={form.control} name="thumbnailUrl" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Thumbnail URL *</FormLabel>
-              <FormControl><Input {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Pricing</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <FormField control={form.control} name="price" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price *</FormLabel>
-                <FormControl><Input type="number" step="0.01" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="mrp" render={({ field }) => (
-              <FormItem>
-                <FormLabel>MRP *</FormLabel>
-                <FormControl><Input type="number" step="0.01" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="discountPercent" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Discount %</FormLabel>
-                <FormControl><Input type="number" step="0.01" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Dimensions</h3>
-          <div className="grid grid-cols-4 gap-4">
-            <FormField control={form.control} name="length" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Length *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="height" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Height *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="breadth" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Breadth *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="weight" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weight *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="packageSize" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Package Size *</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="shelfLife" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Shelf Life *</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Details</h3>
-          <FormField control={form.control} name="ingredients" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ingredients *</FormLabel>
-              <FormControl><Textarea {...field} rows={2} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="stockQuantity" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Stock *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="availabilityStatus" render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
-                <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                <FormLabel className="!mt-0">In Stock</FormLabel>
-              </FormItem>
-            )} />
-          </div>
-          <div className="flex gap-4">
-            <FormField control={form.control} name="isVegetarian" render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
-                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                <FormLabel className="!mt-0">Vegetarian</FormLabel>
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="isGlutenFree" render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
-                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                <FormLabel className="!mt-0">Gluten Free</FormLabel>
-              </FormItem>
-            )} />
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit">{initialData ? 'Update' : 'Create'}</Button>
-        </div>
-      </form>
-    </Form>
-  )
-}
