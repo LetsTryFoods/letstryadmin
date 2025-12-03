@@ -24,6 +24,7 @@ export default function LoginPage() {
       const token = (response.data as any)?.adminLogin
       
       if (token) {
+        localStorage.setItem('token', token)
         document.cookie = `token=${token}; path=/; max-age=86400`
         toast.success('Login successful!')
         window.location.href = '/dashboard'
