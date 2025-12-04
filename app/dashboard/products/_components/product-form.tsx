@@ -73,6 +73,7 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
       keywords: initialData?.keywords || [],
       tags: initialData?.tags || [],
       discountSource: initialData?.discountSource || "product",
+      favourite: initialData?.favourite ?? false,
     },
   })
 
@@ -248,21 +249,21 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
             <FormField control={form.control} name="price" render={({ field }) => (
               <FormItem>
                 <FormLabel>Price *</FormLabel>
-                <FormControl><Input type="number" step="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="mrp" render={({ field }) => (
               <FormItem>
                 <FormLabel>MRP *</FormLabel>
-                <FormControl><Input type="number" step="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="discountPercent" render={({ field }) => (
               <FormItem>
                 <FormLabel>Discount %</FormLabel>
-                <FormControl><Input type="number" step="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="0.01" min="0" max="100" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
@@ -296,10 +297,9 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="product">Manual (Product)</SelectItem>
-                    <SelectItem value="auto">Auto</SelectItem>
-                    <SelectItem value="seasonal">Seasonal</SelectItem>
-                    <SelectItem value="loyalty">Loyalty</SelectItem>
+                    <SelectItem value="category">Category</SelectItem>
+                    <SelectItem value="product">Product</SelectItem>
+                  
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -313,29 +313,29 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
           <div className="grid grid-cols-5 gap-4">
             <FormField control={form.control} name="length" render={({ field }) => (
               <FormItem>
-                <FormLabel>Length *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
+                <FormLabel>Length (cm) *</FormLabel>
+                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="height" render={({ field }) => (
               <FormItem>
-                <FormLabel>Height *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
+                <FormLabel>Height (cm) *</FormLabel>
+                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="breadth" render={({ field }) => (
               <FormItem>
-                <FormLabel>Breadth *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
+                <FormLabel>Breadth (cm) *</FormLabel>
+                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="weight" render={({ field }) => (
               <FormItem>
                 <FormLabel>Weight *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
@@ -424,8 +424,8 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="stockQuantity" render={({ field }) => (
               <FormItem>
-                <FormLabel>Stock *</FormLabel>
-                <FormControl><Input type="number" {...field} value={field.value as number} /></FormControl>
+                <FormLabel>Stock Quantity *</FormLabel>
+                <FormControl><Input type="number" min="0" step="1" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
@@ -454,6 +454,12 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
               <FormItem className="flex items-center space-x-2">
                 <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                 <FormLabel className="!mt-0">Gluten Free</FormLabel>
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="favourite" render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                <FormLabel className="!mt-0">Favourite</FormLabel>
               </FormItem>
             )} />
           </div>

@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { MoreHorizontal, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
+import { Switch } from "@/components/ui/switch"
 import { useProducts, useCreateProduct, useUpdateProduct, useArchiveProduct, useUnarchiveProduct, useDeleteProduct } from "@/lib/products/useProducts"
 import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/column-selector"
 import { ImagePreviewDialog } from "@/app/dashboard/components/image-preview-dialog"
@@ -30,6 +31,7 @@ const allColumns: ColumnDefinition[] = [
   { key: "availabilityStatus", label: "Status" },
   { key: "isVegetarian", label: "Vegetarian" },
   { key: "isGlutenFree", label: "Gluten Free" },
+  { key: "favourite", label: "Favourite" },
   { key: "isArchived", label: "Archived" },
   { key: "createdAt", label: "Created At" },
   { key: "updatedAt", label: "Updated At" },
@@ -47,6 +49,7 @@ export default function ProductsPage() {
   const [productToAction, setProductToAction] = useState<{ id: string; action: 'archive' | 'unarchive' | 'delete'; isArchived?: boolean } | null>(null)
   const [imagePreview, setImagePreview] = useState<{ url: string; title: string } | null>(null)
   const [includeOutOfStock, setIncludeOutOfStock] = useState(false)
+  const [showArchived, setShowArchived] = useState(false)
 
   const { data: productsData, loading: productsLoading, error: productsError } = useProducts({ page: currentPage, limit: pageSize }, includeOutOfStock)
   const { mutate: createProduct } = useCreateProduct()
@@ -55,7 +58,11 @@ export default function ProductsPage() {
   const { mutate: unarchiveProduct } = useUnarchiveProduct()
   const { mutate: deleteProduct } = useDeleteProduct()
 
-  const products = (productsData as any)?.products?.items || []
+  const allProducts = (productsData as any)?.products?.items || []
+  // Filter products based on showArchived checkbox
+  const products = showArchived 
+    ? allProducts.filter((p: any) => p.isArchived) 
+    : allProducts.filter((p: any) => !p.isArchived)
   const meta = (productsData as any)?.products?.meta || {
     totalCount: 0,
     page: 1,
@@ -116,6 +123,37 @@ export default function ProductsPage() {
     }
   }
 
+  const handleFavouriteToggle = async (productId: string, currentFavourite: boolean) => {
+    try {
+      await updateProduct({
+        variables: {
+          id: productId,
+          input: {
+            favourite: !currentFavourite
+          }
+        }
+      })
+    } catch (error) {
+      console.error('Failed to toggle product favourite status:', error)
+    }
+  }
+
+  const handleArchiveToggle = async (productId: string, currentArchived: boolean) => {
+    try {
+      if (currentArchived) {
+        await unarchiveProduct({
+          variables: { id: productId }
+        })
+      } else {
+        await archiveProduct({
+          variables: { id: productId }
+        })
+      }
+    } catch (error) {
+      console.error('Failed to toggle product archive status:', error)
+    }
+  }
+
   const handleEdit = (productId: string) => {
     const product = products.find((p: any) => p._id === productId)
     if (product) {
@@ -157,6 +195,19 @@ export default function ProductsPage() {
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Show Out of Stock
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-archived"
+              checked={showArchived}
+              onCheckedChange={(checked) => setShowArchived(checked as boolean)}
+            />
+            <label
+              htmlFor="show-archived"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Show Archived
             </label>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -225,9 +276,10 @@ export default function ProductsPage() {
                                 {product.name}
                               </Link>
                             ) : columnKey === 'isArchived' ? (
-                              <span className={product.isArchived ? "text-orange-600" : "text-green-600"}>
-                                {product.isArchived ? 'Archived' : 'Active'}
-                              </span>
+                              <Switch
+                                checked={product.isArchived}
+                                onCheckedChange={() => handleArchiveToggle(product._id, product.isArchived)}
+                              />
                             ) : columnKey === 'thumbnailUrl' ? (
                               product.thumbnailUrl ? (
                                 <button
@@ -246,6 +298,11 @@ export default function ProductsPage() {
                               formatCurrency(product[columnKey], product.currency)
                             ) : columnKey === 'isVegetarian' || columnKey === 'isGlutenFree' ? (
                               product[columnKey] ? '✓' : '✗'
+                            ) : columnKey === 'favourite' ? (
+                              <Switch
+                                checked={product.favourite}
+                                onCheckedChange={() => handleFavouriteToggle(product._id, product.favourite)}
+                              />
                             ) : columnKey === 'availabilityStatus' ? (
                               <span className={typeof product.availabilityStatus === 'boolean' ? (product.availabilityStatus ? 'text-green-600' : 'text-red-600') : (product.availabilityStatus === 'in_stock' ? 'text-green-600' : 'text-red-600')}>
                                 {typeof product.availabilityStatus === 'boolean' ? (product.availabilityStatus ? 'In Stock' : 'Out of Stock') : (product.availabilityStatus === 'in_stock' ? 'In Stock' : 'Out of Stock')}

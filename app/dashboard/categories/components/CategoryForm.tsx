@@ -38,6 +38,7 @@ export function CategoryForm({ onClose, initialData, createCategory, updateCateg
       imageUrl: initialData?.imageUrl || "",
       codeValue: initialData?.codeValue || "",
       inCodeSet: initialData?.inCodeSet || "",
+      favourite: initialData?.favourite ?? false,
       isArchived: initialData?.isArchived ?? false,
     },
   })
@@ -176,21 +177,39 @@ export function CategoryForm({ onClose, initialData, createCategory, updateCateg
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="isArchived"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormLabel className="!mt-0">Is Archived</FormLabel>
-            </FormItem>
-          )}
-        />
+        
+        <div className="flex gap-4">
+          <FormField
+            control={form.control}
+            name="favourite"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="!mt-0">Favourite</FormLabel>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="isArchived"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="!mt-0">Is Archived</FormLabel>
+              </FormItem>
+            )}
+          />
+        </div>
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel

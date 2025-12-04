@@ -16,7 +16,7 @@ export default function LoginPage() {
     try {
       const response = await login({
         variables: {
-          email: data.email,
+          email: data.email.toLocaleLowerCase(),
           password: data.password
         }
       })

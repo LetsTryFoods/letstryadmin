@@ -8,6 +8,7 @@ export const categoryFormSchema = z.object({
   imageUrl: z.string().optional(),
   codeValue: z.string().min(1, { message: "Code Value is required" }),
   inCodeSet: z.string().min(1, { message: "In Code Set is required" }),
+  favourite: z.boolean().optional(),
   isArchived: z.boolean(),
 })
 

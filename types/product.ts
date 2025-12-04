@@ -38,6 +38,7 @@ export interface Product {
   tags: string[];
   discountSource: string;
   isArchived: boolean;
+  favourite: boolean;
   createdAt: string;
   updatedAt: string;
 }

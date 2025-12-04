@@ -21,6 +21,7 @@ const allColumns: ColumnDefinition[] = [
   { key: "inCodeSet", label: "In Code Set" },
   { key: "productCount", label: "Product Count" },
   { key: "isArchived", label: "Archived" },
+  { key: "favourite", label: "Favourite" },
   { key: "createdAt", label: "Created At" },
   { key: "updatedAt", label: "Updated At" },
 ]
@@ -82,6 +83,7 @@ export default function CategoriesPage() {
             meta={state.meta}
             onPageChange={actions.handlePageChange}
             onArchiveToggle={actions.handleArchiveToggle}
+            onFavouriteToggle={actions.handleFavouriteToggle}
             onEdit={actions.handleEdit}
             onImagePreview={actions.handleImagePreview}
           />

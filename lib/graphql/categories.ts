@@ -13,6 +13,7 @@ export const GET_CATEGORIES = gql`
         codeValue
         inCodeSet
         productCount
+        favourite
         isArchived
         createdAt
         updatedAt
@@ -42,6 +43,7 @@ export const GET_ROOT_CATEGORIES = gql`
         codeValue
         inCodeSet
         productCount
+        favourite
         isArchived
         createdAt
         updatedAt
@@ -71,6 +73,7 @@ export const GET_CATEGORY_CHILDREN = gql`
         codeValue
         inCodeSet
         productCount
+        favourite
         isArchived
         createdAt
         updatedAt
@@ -99,6 +102,7 @@ export const GET_CATEGORY = gql`
       codeValue
       inCodeSet
       productCount
+      favourite
       isArchived
       createdAt
       updatedAt
@@ -118,6 +122,7 @@ export const GET_CATEGORY_BY_SLUG = gql`
       codeValue
       inCodeSet
       productCount
+      favourite
       isArchived
       createdAt
       updatedAt
@@ -137,6 +142,7 @@ export const CREATE_CATEGORY = gql`
       codeValue
       inCodeSet
       productCount
+      favourite
       isArchived
       createdAt
       updatedAt
@@ -156,6 +162,7 @@ export const UPDATE_CATEGORY = gql`
       codeValue
       inCodeSet
       productCount
+      favourite
       isArchived
       createdAt
       updatedAt

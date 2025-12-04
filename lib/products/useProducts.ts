@@ -52,6 +52,7 @@ export interface Product {
   keywords: string[]
   tags: string[]
   discountSource: string
+  favourite: boolean
   isArchived: boolean
   createdAt: string
   updatedAt: string

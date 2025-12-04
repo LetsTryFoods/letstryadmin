@@ -71,6 +71,21 @@ export function useCategoryPage() {
     setDeleteAlertOpen(false)
   }
 
+  const handleFavouriteToggle = async (categoryId: string, currentFavourite: boolean) => {
+    try {
+      await updateCategory({
+        variables: {
+          id: categoryId,
+          input: {
+            favourite: !currentFavourite
+          }
+        }
+      })
+    } catch (error) {
+      console.error('Failed to toggle category favourite status:', error)
+    }
+  }
+
   const handleEdit = (categoryId: string) => {
     const category = categories.find((c: any) => c.id === categoryId)
     if (category) {
@@ -123,6 +138,7 @@ export function useCategoryPage() {
       handlePageChange,
       handleArchiveToggle,
       handleArchiveConfirm,
+      handleFavouriteToggle,
       handleEdit,
       handleCloseDialog,
       handleAddCategory,

@@ -40,6 +40,7 @@ export const GET_PRODUCTS = gql`
         keywords
         tags
         discountSource
+        favourite
         isArchived
         createdAt
         updatedAt
@@ -95,6 +96,7 @@ export const GET_PRODUCT = gql`
       keywords
       tags
       discountSource
+      favourite
       isArchived
       createdAt
       updatedAt
@@ -141,6 +143,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
       keywords
       tags
       discountSource
+      favourite
       isArchived
       createdAt
       updatedAt
@@ -166,6 +169,7 @@ export const GET_PRODUCTS_BY_CATEGORY = gql`
         currency
         availabilityStatus
         stockQuantity
+        favourite
         isArchived
         createdAt
         updatedAt
@@ -200,6 +204,7 @@ export const SEARCH_PRODUCTS = gql`
         currency
         availabilityStatus
         stockQuantity
+        favourite
         isArchived
         createdAt
         updatedAt

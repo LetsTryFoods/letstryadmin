@@ -21,6 +21,7 @@ export interface Category {
   codeValue: string
   inCodeSet: string
   productCount: number
+  favourite: boolean
   isArchived: boolean
   createdAt: string
   updatedAt: string
@@ -53,6 +54,7 @@ export interface CreateCategoryInput {
   imageUrl?: string
   codeValue: string
   inCodeSet: string
+  favourite?: boolean
   isArchived?: boolean
 }
 
@@ -64,6 +66,7 @@ export interface UpdateCategoryInput {
   imageUrl?: string
   codeValue?: string
   inCodeSet?: string
+  favourite?: boolean
   isArchived?: boolean
 }
 

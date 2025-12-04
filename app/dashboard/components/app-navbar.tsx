@@ -49,10 +49,10 @@ export function AppNavbar() {
         {/* Right Side - Notifications & User Profile */}
         <div className="flex items-center gap-2 ml-auto">
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
+          {/* <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
-          </Button>
+          </Button> */}
 
           {/* User Profile Dropdown */}
           <DropdownMenu>
@@ -76,14 +76,14 @@ export function AppNavbar() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => window.location.href = '/dashboard/profile'}>
+              {/* <DropdownMenuItem onClick={() => window.location.href = '/dashboard/profile'}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => window.location.href = '/dashboard/settings'}>
+              </DropdownMenuItem> */}
+              {/* <DropdownMenuItem onClick={() => window.location.href = '/dashboard/settings'}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />

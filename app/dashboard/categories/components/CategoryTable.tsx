@@ -24,6 +24,7 @@ interface CategoryTableProps {
   }
   onPageChange: (page: number) => void
   onArchiveToggle: (id: string, isArchived: boolean) => void
+  onFavouriteToggle: (id: string, favourite: boolean) => void
   onEdit: (id: string) => void
   onImagePreview: (url: string, title: string) => void
 }
@@ -37,6 +38,7 @@ export function CategoryTable({
   meta,
   onPageChange,
   onArchiveToggle,
+  onFavouriteToggle,
   onEdit,
   onImagePreview
 }: CategoryTableProps) {
@@ -86,6 +88,11 @@ export function CategoryTable({
                       <Switch
                         checked={category.isArchived}
                         onCheckedChange={() => onArchiveToggle(category.id, category.isArchived)}
+                      />
+                    ) : columnKey === 'favourite' ? (
+                      <Switch
+                        checked={category.favourite}
+                        onCheckedChange={() => onFavouriteToggle(category.id, category.favourite)}
                       />
                     ) : columnKey === 'imageUrl' ? (
                       category.imageUrl ? (
