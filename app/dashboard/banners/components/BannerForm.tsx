@@ -185,7 +185,7 @@ export function BannerForm({ onClose, initialData, createBanner, updateBanner }:
             name="url"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL *</FormLabel>
+                <FormLabel>Redirect to URL *</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -269,9 +269,24 @@ export function BannerForm({ onClose, initialData, createBanner, updateBanner }:
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Background Color</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="#000000" value={field.value || ''} />
-                </FormControl>
+                <div className="flex items-center gap-2">
+                  <FormControl>
+                    <Input 
+                      type="color" 
+                      {...field} 
+                      value={field.value || '#000000'}
+                      className="w-20 h-10 cursor-pointer"
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="#000000" 
+                      value={field.value || ''}
+                      className="flex-1"
+                    />
+                  </FormControl>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -282,9 +297,24 @@ export function BannerForm({ onClose, initialData, createBanner, updateBanner }:
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Text Color</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="#FFFFFF" value={field.value || ''} />
-                </FormControl>
+                <div className="flex items-center gap-2">
+                  <FormControl>
+                    <Input 
+                      type="color" 
+                      {...field} 
+                      value={field.value || '#FFFFFF'}
+                      className="w-20 h-10 cursor-pointer"
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="#FFFFFF" 
+                      value={field.value || ''}
+                      className="flex-1"
+                    />
+                  </FormControl>
+                </div>
                 <FormMessage />
               </FormItem>
             )}

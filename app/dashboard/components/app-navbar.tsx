@@ -33,7 +33,7 @@ export function AppNavbar() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-md">
+        {/* <div className="flex-1 max-w-md">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -44,7 +44,7 @@ export function AppNavbar() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Right Side - Notifications & User Profile */}
         <div className="flex items-center gap-2 ml-auto">

@@ -64,7 +64,7 @@ export default function BannersPage() {
             <DialogTrigger asChild>
               <Button onClick={handleAddBanner}>Add Banner</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-7xl min-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingBanner ? 'Edit Banner' : 'Add New Banner'}</DialogTitle>
               </DialogHeader>
