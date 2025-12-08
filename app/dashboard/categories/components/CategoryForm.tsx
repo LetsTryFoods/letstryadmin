@@ -99,7 +99,7 @@ export function CategoryForm({ onClose, initialData, createCategory, updateCateg
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="slug"
             render={({ field }) => (
@@ -111,7 +111,7 @@ export function CategoryForm({ onClose, initialData, createCategory, updateCateg
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           <FormField
             control={form.control}
             name="codeValue"
