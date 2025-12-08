@@ -48,6 +48,16 @@ const items = [
     title: "Categories",
     url: "/dashboard/categories",
     icon: FolderTree,
+  },
+  {
+    title: "Address",
+    url: "/dashboard/address",
+    icon: Truck,
+  },
+  {
+    title: "Footer Details",
+    url: "/dashboard/footer-detail",
+    icon: Settings,
   }
 ]
 
