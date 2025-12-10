@@ -7,42 +7,51 @@ import {
   DELETE_FOOTER_DETAIL
 } from '@/lib/graphql/footer'
 
+export interface SocialMediaLink {
+  platform: string
+  url: string
+  iconUrl: string
+}
+
 export interface FooterDetail {
   _id: string
+  logoUrl: string
   companyName: string
   cin: string
   address: string
   email: string
   phone: string
   exportEmail: string
-  facebookUrl: string
-  instagramUrl: string
+  socialMediaTitle: string
+  socialMediaLinks: SocialMediaLink[]
   isActive: boolean
   createdAt: string
   updatedAt: string
 }
 
 export interface CreateFooterDetailInput {
+  logoUrl?: string
   companyName: string
   cin: string
   address: string
   email: string
   phone: string
   exportEmail?: string
-  facebookUrl?: string
-  instagramUrl?: string
+  socialMediaTitle?: string
+  socialMediaLinks?: SocialMediaLink[]
   isActive?: boolean
 }
 
 export interface UpdateFooterDetailInput {
+  logoUrl?: string
   companyName?: string
   cin?: string
   address?: string
   email?: string
   phone?: string
   exportEmail?: string
-  facebookUrl?: string
-  instagramUrl?: string
+  socialMediaTitle?: string
+  socialMediaLinks?: SocialMediaLink[]
   isActive?: boolean
 }
 

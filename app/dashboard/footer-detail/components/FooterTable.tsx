@@ -74,6 +74,10 @@ export function FooterTable({
                       checked={footer.isActive}
                       onCheckedChange={() => onActiveToggle(footer._id, footer.isActive)}
                     />
+                  ) : columnKey === 'logoUrl' ? (
+                    footer.logoUrl ? (
+                      <img src={footer.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
+                    ) : '-'
                   ) : columnKey === 'address' ? (
                     <div className="max-w-[250px] truncate" title={footer.address}>
                       {footer.address}
@@ -86,11 +90,25 @@ export function FooterTable({
                     <a href={`tel:${footer.phone}`} className="text-primary hover:underline">
                       {footer.phone}
                     </a>
-                  ) : columnKey === 'facebookUrl' || columnKey === 'instagramUrl' ? (
-                    footer[columnKey] ? (
-                      <a href={footer[columnKey]} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        {columnKey === 'facebookUrl' ? 'Facebook' : 'Instagram'}
-                      </a>
+                  ) : columnKey === 'socialMediaLinks' ? (
+                    footer.socialMediaLinks?.length > 0 ? (
+                      <div className="flex gap-2">
+                        {footer.socialMediaLinks.map((link: any, idx: number) => (
+                          <a 
+                            key={idx} 
+                            href={link.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            title={link.platform}
+                          >
+                            {link.iconUrl ? (
+                              <img src={link.iconUrl} alt={link.platform} className="h-5 w-5 object-contain" />
+                            ) : (
+                              <span className="text-xs text-primary hover:underline">{link.platform}</span>
+                            )}
+                          </a>
+                        ))}
+                      </div>
                     ) : '-'
                   ) : (
                     String(footer[columnKey as keyof typeof footer] || '-')

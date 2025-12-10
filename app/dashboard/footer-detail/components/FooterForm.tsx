@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { footerFormSchema, FooterFormValues } from "@/lib/validations/footer.schema"
+import { Plus, Trash2 } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 
 interface FooterFormProps {
   onClose: () => void
@@ -20,16 +22,22 @@ export function FooterForm({ onClose, initialData, createFooter, updateFooter }:
   const form = useForm<FooterFormValues>({
     resolver: zodResolver(footerFormSchema),
     defaultValues: {
+      logoUrl: initialData?.logoUrl || "",
       companyName: initialData?.companyName || "",
       cin: initialData?.cin || "",
       address: initialData?.address || "",
       email: initialData?.email || "",
       phone: initialData?.phone || "",
       exportEmail: initialData?.exportEmail || "",
-      facebookUrl: initialData?.facebookUrl || "",
-      instagramUrl: initialData?.instagramUrl || "",
+      socialMediaTitle: initialData?.socialMediaTitle || "Follow us",
+      socialMediaLinks: initialData?.socialMediaLinks || [],
       isActive: initialData?.isActive ?? true,
     },
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "socialMediaLinks",
   })
 
   const onSubmit = async (data: FooterFormValues) => {
@@ -37,9 +45,10 @@ export function FooterForm({ onClose, initialData, createFooter, updateFooter }:
       // Clean up empty optional fields
       const cleanedData = {
         ...data,
+        logoUrl: data.logoUrl || undefined,
         exportEmail: data.exportEmail || undefined,
-        facebookUrl: data.facebookUrl || undefined,
-        instagramUrl: data.instagramUrl || undefined,
+        socialMediaTitle: data.socialMediaTitle || undefined,
+        socialMediaLinks: data.socialMediaLinks?.length ? data.socialMediaLinks : undefined,
       }
 
       if (initialData) {
@@ -64,7 +73,22 @@ export function FooterForm({ onClose, initialData, createFooter, updateFooter }:
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+        {/* Logo Section */}
+        <FormField
+          control={form.control}
+          name="logoUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Logo URL</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="e.g., https://example.com/logo.png" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -155,34 +179,99 @@ export function FooterForm({ onClose, initialData, createFooter, updateFooter }:
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <Separator className="my-4" />
+
+        {/* Social Media Section */}
+        <div className="space-y-4">
           <FormField
             control={form.control}
-            name="facebookUrl"
+            name="socialMediaTitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Facebook URL</FormLabel>
+                <FormLabel>Social Media Title</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g., https://facebook.com/letstry" />
+                  <Input {...field} placeholder="e.g., Follow us" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="instagramUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Instagram URL</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="e.g., https://instagram.com/letstry" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <FormLabel>Social Media Links</FormLabel>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ platform: "", url: "", iconUrl: "" })}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add Link
+              </Button>
+            </div>
+
+            {fields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-start p-3 border rounded-lg">
+                <FormField
+                  control={form.control}
+                  name={`socialMediaLinks.${index}.platform`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Platform</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., Facebook" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`socialMediaLinks.${index}.url`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., https://facebook.com/..." />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`socialMediaLinks.${index}.iconUrl`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Icon URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., https://..." />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="mt-6 text-destructive hover:text-destructive"
+                  onClick={() => remove(index)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+
+            {fields.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">
+                No social media links added. Click &quot;Add Link&quot; to add one.
+              </p>
             )}
-          />
+          </div>
         </div>
+
+        <Separator className="my-4" />
 
         <FormField
           control={form.control}
@@ -200,7 +289,7 @@ export function FooterForm({ onClose, initialData, createFooter, updateFooter }:
           )}
         />
 
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
