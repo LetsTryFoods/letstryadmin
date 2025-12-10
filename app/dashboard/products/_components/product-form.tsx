@@ -249,21 +249,21 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
             <FormField control={form.control} name="price" render={({ field }) => (
               <FormItem>
                 <FormLabel>Price *</FormLabel>
-                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="1" min="1" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="mrp" render={({ field }) => (
               <FormItem>
                 <FormLabel>MRP *</FormLabel>
-                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="1" min="1" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="discountPercent" render={({ field }) => (
               <FormItem>
                 <FormLabel>Discount %</FormLabel>
-                <FormControl><Input type="number" step="0.01" min="0" max="100" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="1" min="0" max="100" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
@@ -314,28 +314,28 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
             <FormField control={form.control} name="length" render={({ field }) => (
               <FormItem>
                 <FormLabel>Length (cm) *</FormLabel>
-                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="1" min="1" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="height" render={({ field }) => (
               <FormItem>
                 <FormLabel>Height (cm) *</FormLabel>
-                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="1" min="1" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="breadth" render={({ field }) => (
               <FormItem>
                 <FormLabel>Breadth (cm) *</FormLabel>
-                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="1" min="1" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="weight" render={({ field }) => (
               <FormItem>
                 <FormLabel>Weight *</FormLabel>
-                <FormControl><Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} /></FormControl>
+                <FormControl><Input type="number" step="1" min="1" {...field} value={field.value as number} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
