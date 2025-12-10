@@ -18,6 +18,7 @@ interface FooterFormProps {
   updateFooter: any
 }
 
+
 export function FooterForm({ onClose, initialData, createFooter, updateFooter }: FooterFormProps) {
   const form = useForm<FooterFormValues>({
     resolver: zodResolver(footerFormSchema),
