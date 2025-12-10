@@ -89,6 +89,22 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
     })) as any, { shouldValidate: false, shouldDirty: true })
   }, [uploadedImages, form])
 
+  // Watch price and mrp to auto-calculate discount percentage
+  const watchedPrice = form.watch('price')
+  const watchedMrp = form.watch('mrp')
+
+  useEffect(() => {
+    const price = Number(watchedPrice) || 0
+    const mrp = Number(watchedMrp) || 0
+    
+    if (mrp > 0 && price > 0 && price <= mrp) {
+      const discount = Math.round(((mrp - price) / mrp) * 100)
+      form.setValue('discountPercent', discount, { shouldValidate: true })
+    } else if (mrp > 0 && price === mrp) {
+      form.setValue('discountPercent', 0, { shouldValidate: true })
+    }
+  }, [watchedPrice, watchedMrp, form])
+
   const onSubmit = async (data: ProductFormValues) => {
     console.log("onSubmit called with data:", data)
     try {
@@ -246,13 +262,6 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Pricing</h3>
           <div className="grid grid-cols-3 gap-4">
-            <FormField control={form.control} name="price" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price *</FormLabel>
-                <FormControl><Input type="number" step="1" min="1" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
             <FormField control={form.control} name="mrp" render={({ field }) => (
               <FormItem>
                 <FormLabel>MRP *</FormLabel>
@@ -260,11 +269,39 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
                 <FormMessage />
               </FormItem>
             )} />
+            <FormField control={form.control} name="price" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Selling Price *</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    step="1" 
+                    min="1" 
+                    max={form.watch('mrp') || undefined}
+                    {...field} 
+                    value={field.value as number} 
+                  />
+                </FormControl>
+                {Number(field.value) > Number(form.watch('mrp')) && Number(form.watch('mrp')) > 0 && (
+                  <p className="text-sm text-destructive">Price cannot be greater than MRP</p>
+                )}
+                <FormMessage />
+              </FormItem>
+            )} />
             <FormField control={form.control} name="discountPercent" render={({ field }) => (
               <FormItem>
                 <FormLabel>Discount %</FormLabel>
-                <FormControl><Input type="number" step="1" min="0" max="100" {...field} value={field.value as number} /></FormControl>
-                <FormMessage />
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value as number} 
+                    readOnly 
+                    disabled
+                    className="bg-muted cursor-not-allowed"
+                  />
+                </FormControl>
+                {/* <p className="text-xs text-muted-foreground">Auto-calculated from MRP & Price</p> */}
               </FormItem>
             )} />
           </div>

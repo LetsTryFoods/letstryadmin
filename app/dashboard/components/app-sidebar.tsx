@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 import { LogOut, Image, FolderTree } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { Package, User, Settings, LayoutDashboard, Truck, RefreshCcw, FileText, Trash2 } from "lucide-react"
+import { Package, User, Settings, LayoutDashboard, Truck, RefreshCcw, FileText, Trash2, Search } from "lucide-react"
 import { usePolicies, useDeletePolicy } from "@/lib/policies/usePolicies"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
@@ -58,6 +58,16 @@ const items = [
     title: "Footer Details",
     url: "/dashboard/footer-detail",
     icon: Settings,
+  },
+  {
+    title: "SEO Content",
+    url: "/dashboard/seo-content",
+    icon: RefreshCcw,
+  },
+  {
+    title: "Product SEO",
+    url: "/dashboard/sco-product",
+    icon: Search,
   }
 ]
 

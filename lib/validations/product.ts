@@ -37,9 +37,9 @@ export const productFormSchema = z.object({
   tags: z.array(z.string()).default([]),
   discountSource: z.string().default("product"),
   favourite: z.boolean().optional(),
-}).refine((data) => data.mrp >= data.price, {
-  message: "MRP must be greater than or equal to Price",
-  path: ["mrp"],
+}).refine((data) => data.price <= data.mrp, {
+  message: "Selling Price cannot be greater than MRP",
+  path: ["price"],
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema>
