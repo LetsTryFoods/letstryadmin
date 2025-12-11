@@ -118,7 +118,7 @@ export default function ProductSeoPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.configuredCount}</div>
-            <p className="text-xs text-muted-foreground">{stats.activeCount} active</p>
+            <p className="text-xs text-muted-foreground">Products with SEO</p>
           </CardContent>
         </Card>
 

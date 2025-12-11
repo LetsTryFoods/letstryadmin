@@ -2,13 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { useProductSeoList, useDeleteProductSeo, ProductSeo } from "@/lib/product-seo/useProductSeo";
-import { useProducts, Product } from "@/lib/products/useProducts";
+import { useProductsMinimal, Product } from "@/lib/products/useProducts";
 
 interface ProductSeoStatus {
   productId: string;
   hasSeo: boolean;
   metaTitle?: string;
-  isActive?: boolean;
   seoData?: ProductSeo;
 }
 
@@ -23,12 +22,14 @@ export function useProductSeoPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(20);
 
-  // Fetch products and SEO data
-  const { data: productsData, loading: productsLoading, error: productsError, refetch: refetchProducts } = useProducts(
+  // Fetch products (minimal query to avoid Infinity error on numeric fields)
+  const { data: productsData, loading: productsLoading, error: productsError, refetch: refetchProducts } = useProductsMinimal(
     { page: currentPage, limit: pageSize },
     true // Include out of stock products
   );
-  const { productSeoList, loading: seoLoading, error: seoError, refetch: refetchSeo } = useProductSeoList();
+  
+  // Fetch SEO data separately
+  const { productSeoList, loading: seoLoading, refetch: refetchSeo } = useProductSeoList();
   const { deleteProductSeo, loading: deleteLoading } = useDeleteProductSeo();
 
   // Extract products from query result with proper typing
@@ -46,7 +47,6 @@ export function useProductSeoPage() {
           productId: seo.productId,
           hasSeo: true,
           metaTitle: seo.metaTitle,
-          isActive: seo.isActive,
           seoData: seo,
         });
       });
@@ -59,13 +59,11 @@ export function useProductSeoPage() {
   const stats = useMemo(() => {
     const totalProducts = paginationMeta?.totalCount || products.length;
     const configuredCount = productSeoList?.length || 0;
-    const activeCount = productSeoList?.filter((s: ProductSeo) => s.isActive).length || 0;
     const notConfiguredCount = totalProducts - configuredCount;
 
     return {
       totalProducts,
       configuredCount,
-      activeCount,
       notConfiguredCount,
       coveragePercentage: totalProducts > 0 
         ? Math.round((configuredCount / totalProducts) * 100) 
@@ -85,7 +83,7 @@ export function useProductSeoPage() {
         product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      // Status filter
+      // Status filter - check SEO map
       const hasSeo = seoStatusMap.has(product._id);
       const matchesStatus =
         filterStatus === "all" ||
@@ -99,6 +97,7 @@ export function useProductSeoPage() {
   // Handlers
   const handleEditSeo = (product: Product) => {
     setSelectedProduct(product);
+    // Get SEO from seoStatusMap
     const seoStatus = seoStatusMap.get(product._id);
     setSelectedSeoData(seoStatus?.seoData || null);
     setIsFormOpen(true);
@@ -106,6 +105,7 @@ export function useProductSeoPage() {
 
   const handleDeleteSeo = (product: Product) => {
     setSelectedProduct(product);
+    // Get SEO from seoStatusMap
     const seoStatus = seoStatusMap.get(product._id);
     setSelectedSeoData(seoStatus?.seoData || null);
     setIsDeleteDialogOpen(true);
@@ -125,7 +125,7 @@ export function useProductSeoPage() {
 
   const handleFormSuccess = () => {
     handleCloseForm();
-    refetchSeo();
+    refetchSeo(); // Refetch SEO data
   };
 
   const handleConfirmDelete = async () => {
@@ -134,14 +134,14 @@ export function useProductSeoPage() {
     try {
       await deleteProductSeo(selectedSeoData._id);
       handleCloseDeleteDialog();
-      refetchSeo();
+      refetchSeo(); // Refetch SEO data
     } catch (error) {
       console.error("Failed to delete product SEO:", error);
     }
   };
 
-  // Loading and error states - only show error for products, not SEO (as it may not exist yet)
-  const isLoading = productsLoading;
+  // Loading and error states
+  const isLoading = productsLoading || seoLoading;
   const error = productsError;
 
   return {

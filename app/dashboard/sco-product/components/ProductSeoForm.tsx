@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -21,6 +20,7 @@ import { ProductSeo, useCreateProductSeo, useUpdateProductSeo } from "@/lib/prod
 import { Badge } from "@/components/ui/badge";
 import { Package } from "lucide-react";
 import { Product } from "@/lib/products/useProducts";
+import { TagInput } from "@/components/custom/tag-input";
 
 interface ProductSeoFormProps {
   product: Product;
@@ -41,20 +41,20 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
   const stripHtml = (html: string) => html?.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim() || "";
   const defaultMetaDescription = stripHtml(product.description || "").substring(0, 155);
 
+  // Use existingSeo passed from parent (fetched separately)
+  const seoData = existingSeo;
+
   const form = useForm<ProductSeoFormData>({
     resolver: zodResolver(productSeoSchema),
     defaultValues: {
       productId: product._id,
-      productSlug: product.slug,
-      productName: product.name,
-      metaTitle: existingSeo?.metaTitle || defaultMetaTitle,
-      metaDescription: existingSeo?.metaDescription || defaultMetaDescription,
-      metaKeywords: existingSeo?.metaKeywords || "",
-      canonicalUrl: existingSeo?.canonicalUrl || `https://letstryfoods.com/products/${product.slug}`,
-      ogTitle: existingSeo?.ogTitle || "",
-      ogDescription: existingSeo?.ogDescription || "",
-      ogImage: existingSeo?.ogImage || product.images?.[0]?.url || "",
-      isActive: existingSeo?.isActive ?? true,
+      metaTitle: seoData?.metaTitle || defaultMetaTitle,
+      metaDescription: seoData?.metaDescription || defaultMetaDescription,
+      metaKeywords: seoData?.metaKeywords || [],
+      canonicalUrl: seoData?.canonicalUrl || `https://letstryfoods.com/products/${product.slug}`,
+      ogTitle: seoData?.ogTitle || "",
+      ogDescription: seoData?.ogDescription || "",
+      ogImage: seoData?.ogImage || product?.variants?.[0]?.images?.[0]?.url || "",
     },
   });
 
@@ -64,16 +64,18 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
   const handleSubmit = async (data: ProductSeoFormData) => {
     try {
       const cleanedData = {
-        ...data,
-        metaKeywords: data.metaKeywords || undefined,
+        productId: data.productId,
+        metaTitle: data.metaTitle,
+        metaDescription: data.metaDescription,
+        metaKeywords: data.metaKeywords || [],
         canonicalUrl: data.canonicalUrl || undefined,
         ogTitle: data.ogTitle || undefined,
         ogDescription: data.ogDescription || undefined,
         ogImage: data.ogImage || undefined,
       };
 
-      if (existingSeo?._id) {
-        await updateProductSeo(existingSeo._id, cleanedData);
+      if (seoData?._id) {
+        await updateProductSeo(seoData._id, cleanedData);
       } else {
         await createProductSeo(cleanedData);
       }
@@ -108,10 +110,10 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
               </div>
             )}
           </div>
-          {product.images?.[0]?.url && (
+          {product?.variants?.[0]?.images?.[0]?.url && (
             <div className="mt-2">
               <img 
-                src={product.images[0].url} 
+                src={product?.variants?.[0]?.images?.[0]?.url} 
                 alt={product.name} 
                 className="w-20 h-20 object-cover rounded"
               />
@@ -119,23 +121,8 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
           )}
         </div>
 
-        {/* Hidden fields */}
+        {/* Hidden field for productId */}
         <input type="hidden" {...form.register("productId")} />
-        <input type="hidden" {...form.register("productSlug")} />
-        <input type="hidden" {...form.register("productName")} />
-
-        <FormField
-          control={form.control}
-          name="isActive"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-              <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-              <FormLabel className="mt-0!">Active (Enable SEO for this product)</FormLabel>
-            </FormItem>
-          )}
-        />
 
         <Separator />
 
@@ -194,9 +181,15 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
               <FormItem>
                 <FormLabel>Meta Keywords (Optional)</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="organic, healthy, snacks, buy online" />
+                  <TagInput
+                    value={field.value || []}
+                    onChange={field.onChange}
+                    placeholder="Add keyword and press Enter"
+                  />
                 </FormControl>
-                <FormDescription>Comma-separated keywords related to this product</FormDescription>
+                <FormDescription>
+                  Add keywords related to this product. Press Enter or comma to add each keyword.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -292,7 +285,7 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : existingSeo ? "Update SEO" : "Save SEO"}
+            {isLoading ? "Saving..." : seoData?._id ? "Update SEO" : "Save SEO"}
           </Button>
         </div>
       </form>

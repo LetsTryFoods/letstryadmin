@@ -11,35 +11,29 @@ import {
 export interface ProductSeo {
   _id: string;
   productId: string;
-  productSlug: string;
-  productName: string;
-  metaTitle: string;
-  metaDescription: string;
-  metaKeywords?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords: string[];
   canonicalUrl?: string;
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateProductSeoInput {
   productId: string;
-  productSlug: string;
-  productName: string;
   metaTitle: string;
   metaDescription: string;
-  metaKeywords?: string;
+  metaKeywords?: string[];
   canonicalUrl?: string;
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
-  isActive?: boolean;
 }
 
-export interface UpdateProductSeoInput extends Partial<Omit<CreateProductSeoInput, 'productId' | 'productSlug'>> {}
+export interface UpdateProductSeoInput extends Partial<Omit<CreateProductSeoInput, 'productId'>> {}
 
 // Get all product SEO entries - TEMPORARILY SKIPPED until backend is ready
 export function useProductSeoList() {

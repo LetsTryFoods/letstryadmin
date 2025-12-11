@@ -24,7 +24,6 @@ interface ProductSeoStatus {
   productId: string;
   hasSeo: boolean;
   metaTitle?: string;
-  isActive?: boolean;
   seoData?: ProductSeo;
 }
 
@@ -79,15 +78,14 @@ export function ProductSeoTable({
         {products.map((product) => {
           const seoStatus = seoStatusMap.get(product._id);
           const hasSeo = seoStatus?.hasSeo || false;
-          const isActive = seoStatus?.isActive || false;
 
           return (
             <TableRow key={product._id}>
               {/* Thumbnail */}
               <TableCell>
-                {product.images?.[0]?.url ? (
+                {product?.variants?.[0]?.images?.[0]?.url ? (
                   <img
-                    src={product.images[0].url}
+                    src={product?.variants?.[0]?.images?.[0]?.url}
                     alt={product.name}
                     className="w-10 h-10 object-cover rounded"
                   />
@@ -119,9 +117,9 @@ export function ProductSeoTable({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Badge variant={isActive ? "default" : "secondary"} className="gap-1">
+                        <Badge variant="default" className="gap-1">
                           <Check className="h-3 w-3" />
-                          {isActive ? "Active" : "Inactive"}
+                          Configured
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>

@@ -6,20 +6,18 @@ import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/col
 import { Pagination } from "@/app/dashboard/components/pagination"
 import { ProductActions } from "./product-actions"
 import { Product } from "@/types/product"
+import { Badge } from "@/components/ui/badge"
 
 export const allColumns: ColumnDefinition[] = [
   { key: "_id", label: "ID" },
   { key: "name", label: "Name" },
   { key: "slug", label: "Slug" },
   { key: "brand", label: "Brand" },
-  { key: "sku", label: "SKU" },
   { key: "categoryId", label: "Category ID" },
-  { key: "price", label: "Price" },
-  { key: "mrp", label: "MRP" },
-  { key: "discountPercent", label: "Discount %" },
+  { key: "variants", label: "Variants" },
+  { key: "priceRange", label: "Price Range" },
   { key: "thumbnailUrl", label: "Thumbnail" },
-  { key: "stockQuantity", label: "Stock" },
-  { key: "availabilityStatus", label: "Status" },
+  { key: "defaultVariant", label: "Default SKU" },
   { key: "isVegetarian", label: "Vegetarian" },
   { key: "isGlutenFree", label: "Gluten Free" },
   { key: "isArchived", label: "Archived" },
@@ -106,7 +104,11 @@ export function ProductTable({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  products.map((product) => (
+                  products.map((product) => {
+                    const defaultVariant = product.defaultVariant || product.variants?.[0]
+                    const thumbnailUrl = defaultVariant?.thumbnailUrl || product.variants?.[0]?.thumbnailUrl
+                    
+                    return (
                     <TableRow key={product._id}>
                       {selectedColumns.map(columnKey => (
                         <TableCell key={columnKey}>
@@ -119,9 +121,9 @@ export function ProductTable({
                               {product.isArchived ? 'Archived' : 'Active'}
                             </span>
                           ) : columnKey === 'thumbnailUrl' ? (
-                            product.thumbnailUrl ? (
+                            thumbnailUrl ? (
                               <button
-                                onClick={() => onImagePreview(String(product.thumbnailUrl || ''), 'Product Thumbnail')}
+                                onClick={() => onImagePreview(String(thumbnailUrl), 'Product Thumbnail')}
                                 className="text-blue-600 hover:text-blue-800 underline text-left max-w-[200px] truncate block"
                               >
                                 View Image
@@ -129,14 +131,20 @@ export function ProductTable({
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )
-                          ) : columnKey === 'price' || columnKey === 'mrp' ? (
-                            formatCurrency(product[columnKey as keyof Product] as number, product.currency)
+                          ) : columnKey === 'variants' ? (
+                            <Badge variant="outline">{product.variants?.length || 0} variant(s)</Badge>
+                          ) : columnKey === 'priceRange' ? (
+                            product.priceRange ? (
+                              <span>
+                                {formatCurrency(product.priceRange.min, product.currency)} - {formatCurrency(product.priceRange.max, product.currency)}
+                              </span>
+                            ) : defaultVariant ? (
+                              formatCurrency(defaultVariant.price, product.currency)
+                            ) : '-'
+                          ) : columnKey === 'defaultVariant' ? (
+                            defaultVariant?.sku || '-'
                           ) : columnKey === 'isVegetarian' || columnKey === 'isGlutenFree' ? (
                             product[columnKey as keyof Product] ? '✓' : '✗'
-                          ) : columnKey === 'availabilityStatus' ? (
-                            <span className={typeof product.availabilityStatus === 'boolean' ? (product.availabilityStatus ? 'text-green-600' : 'text-red-600') : (product.availabilityStatus === 'in_stock' ? 'text-green-600' : 'text-red-600')}>
-                              {typeof product.availabilityStatus === 'boolean' ? (product.availabilityStatus ? 'In Stock' : 'Out of Stock') : (product.availabilityStatus === 'in_stock' ? 'In Stock' : 'Out of Stock')}
-                            </span>
                           ) : (
                             <div className="max-w-[200px] truncate">
                               {String(product[columnKey as keyof Product] || '-')}
@@ -152,7 +160,7 @@ export function ProductTable({
                         />
                       </TableCell>
                     </TableRow>
-                  ))
+                  )})
                 )}
               </TableBody>
             </Table>

@@ -1,19 +1,22 @@
 'use client'
 
+import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useProduct } from "@/lib/products/useProducts"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Package, Tag, DollarSign, Ruler, Info, Image as ImageIcon, Layers, Barcode, Scale } from "lucide-react"
+import { ArrowLeft, Package, Tag, DollarSign, Ruler, Info, Image as ImageIcon, Layers, Star, Box } from "lucide-react"
 import Image from "next/image"
+import { ProductVariant } from "@/types/product"
 
 export default function ProductDetailPage() {
   const params = useParams()
   const router = useRouter()
   const id = params.id as string
   const { data, loading, error } = useProduct(id)
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number>(0)
 
   if (loading) {
     return (
@@ -54,6 +57,13 @@ export default function ProductDetailPage() {
     }).format(amount)
   }
 
+  // Get variants from product
+  const variants: ProductVariant[] = product.variants || []
+  const selectedVariant = variants[selectedVariantIndex] || product.defaultVariant || variants[0]
+  
+  // Find default variant index
+  const defaultVariantIndex = variants.findIndex((v: ProductVariant) => v.isDefault)
+
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
@@ -71,9 +81,12 @@ export default function ProductDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-           <Badge variant={product.availabilityStatus === 'in_stock' ? "default" : "destructive"}>
-            {product.availabilityStatus === 'in_stock' ? 'In Stock' : 'Out of Stock'}
-          </Badge>
+          {product.priceRange && (
+            <Badge variant="outline">
+              {formatCurrency(product.priceRange.min, product.currency)} - {formatCurrency(product.priceRange.max, product.currency)}
+            </Badge>
+          )}
+          <Badge variant="secondary">{variants.length} variant(s)</Badge>
         </div>
       </div>
 
@@ -95,12 +108,8 @@ export default function ProductDetailPage() {
                   <p>{product.brand}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Category ID</p>
-                  <p>{product.categoryId}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">SKU</p>
-                  <p className="font-mono">{product.sku}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Category</p>
+                  <p>{product.category?.name || product.categoryId}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">GTIN</p>
@@ -159,7 +168,7 @@ export default function ProductDetailPage() {
                     <Tag className="h-4 w-4" /> Keywords
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {product.keywords.length > 0 ? (
+                    {product.keywords?.length > 0 ? (
                       product.keywords.map((keyword: string, i: number) => (
                         <Badge key={i} variant="outline">{keyword}</Badge>
                       ))
@@ -173,7 +182,7 @@ export default function ProductDetailPage() {
                     <Layers className="h-4 w-4" /> Tags
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {product.tags.length > 0 ? (
+                    {product.tags?.length > 0 ? (
                       product.tags.map((tag: string, i: number) => (
                         <Badge key={i} variant="secondary">{tag}</Badge>
                       ))
@@ -185,21 +194,103 @@ export default function ProductDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Product Variants */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Box className="h-5 w-5" />
+                Product Variants ({variants.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {variants.map((variant: ProductVariant, index: number) => (
+                  <div 
+                    key={variant._id || index}
+                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                      selectedVariantIndex === index ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                    }`}
+                    onClick={() => setSelectedVariantIndex(index)}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">{variant.name}</h4>
+                        {variant.isDefault && (
+                          <Badge variant="default" className="text-xs">
+                            <Star className="h-3 w-3 mr-1" />
+                            Default
+                          </Badge>
+                        )}
+                        {!variant.isActive && (
+                          <Badge variant="destructive" className="text-xs">Inactive</Badge>
+                        )}
+                      </div>
+                      <Badge variant={variant.availabilityStatus === 'in_stock' ? "default" : "destructive"}>
+                        {variant.availabilityStatus === 'in_stock' ? 'In Stock' : 
+                         variant.availabilityStatus === 'out_of_stock' ? 'Out of Stock' :
+                         variant.availabilityStatus === 'pre_order' ? 'Pre-Order' : 'Discontinued'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">SKU</p>
+                        <p className="font-mono">{variant.sku}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Price</p>
+                        <p className="font-semibold">{formatCurrency(variant.price, product.currency)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">MRP</p>
+                        <p className="line-through text-muted-foreground">{formatCurrency(variant.mrp, product.currency)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Discount</p>
+                        <p className="text-green-600">{variant.discountPercent}% OFF</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Package Size</p>
+                        <p>{variant.packageSize}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Weight</p>
+                        <p>{variant.weight} {variant.weightUnit}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Dimensions</p>
+                        <p>{variant.length}×{variant.height}×{variant.breadth} cm</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Stock</p>
+                        <p>{variant.stockQuantity}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {variants.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">No variants found for this product.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Right Column - Sidebar */}
+        {/* Right Column - Sidebar (Selected Variant Details) */}
         <div className="space-y-6">
-          {/* Images */}
+          {/* Variant Images */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ImageIcon className="h-5 w-5" />
-                Images
+                {selectedVariant ? `${selectedVariant.name} Images` : 'Images'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-2">
-                {product.images.map((img: any, i: number) => (
+                {selectedVariant?.images?.map((img: any, i: number) => (
                   <div key={i} className="relative aspect-square rounded-md overflow-hidden border">
                     <Image
                       src={img.url}
@@ -209,80 +300,92 @@ export default function ProductDetailPage() {
                     />
                   </div>
                 ))}
-                {product.images.length === 0 && (
+                {(!selectedVariant?.images || selectedVariant.images.length === 0) && (
                   <p className="text-sm text-muted-foreground col-span-2 text-center py-4">No images available</p>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Pricing & Stock */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Pricing & Stock
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Price</p>
-                  <p className="text-xl font-bold">{formatCurrency(product.price, product.currency)}</p>
+          {/* Selected Variant Pricing & Stock */}
+          {selectedVariant && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  {selectedVariant.name} - Pricing & Stock
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Price</p>
+                    <p className="text-xl font-bold">{formatCurrency(selectedVariant.price, product.currency)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">MRP</p>
+                    <p className="text-muted-foreground line-through">{formatCurrency(selectedVariant.mrp, product.currency)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Discount</p>
+                    <Badge variant="secondary">{selectedVariant.discountPercent}% OFF</Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Discount Source</p>
+                    <p className="capitalize">{selectedVariant.discountSource}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Stock Quantity</p>
+                    <p>{selectedVariant.stockQuantity}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Status</p>
+                    <Badge variant={selectedVariant.availabilityStatus === 'in_stock' ? "default" : "destructive"}>
+                      {selectedVariant.availabilityStatus === 'in_stock' ? 'In Stock' : 
+                       selectedVariant.availabilityStatus === 'out_of_stock' ? 'Out of Stock' :
+                       selectedVariant.availabilityStatus === 'pre_order' ? 'Pre-Order' : 'Discontinued'}
+                    </Badge>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">MRP</p>
-                  <p className="text-muted-foreground line-through">{formatCurrency(product.mrp, product.currency)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Discount</p>
-                  <Badge variant="secondary">{product.discountPercent}% OFF</Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Discount Source</p>
-                  <p className="capitalize">{product.discountSource}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Stock Quantity</p>
-                  <p>{product.stockQuantity}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Dimensions & Weight */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Ruler className="h-5 w-5" />
-                Dimensions & Weight
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Length</p>
-                  <p>{product.length} cm</p>
+          {/* Selected Variant Dimensions & Weight */}
+          {selectedVariant && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Ruler className="h-5 w-5" />
+                  {selectedVariant.name} - Dimensions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Length</p>
+                    <p>{selectedVariant.length} cm</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Height</p>
+                    <p>{selectedVariant.height} cm</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Breadth</p>
+                    <p>{selectedVariant.breadth} cm</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Weight</p>
+                    <p>{selectedVariant.weight} {selectedVariant.weightUnit}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Package Size</p>
+                    <p>{selectedVariant.packageSize}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Height</p>
-                  <p>{product.height} cm</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Breadth</p>
-                  <p>{product.breadth} cm</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Weight</p>
-                  <p>{product.weight} {product.weightUnit}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Package Size</p>
-                  <p>{product.packageSize}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

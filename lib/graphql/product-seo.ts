@@ -1,23 +1,25 @@
 import { gql } from "@apollo/client";
 
+// SEO fields fragment
+const SEO_FIELDS = `
+  _id
+  productId
+  metaTitle
+  metaDescription
+  metaKeywords
+  canonicalUrl
+  ogTitle
+  ogDescription
+  ogImage
+  createdAt
+  updatedAt
+`;
+
 // Get all product SEO entries
 export const GET_PRODUCT_SEO_LIST = gql`
   query GetProductSeoList {
     productSeoList {
-      _id
-      productId
-      productSlug
-      productName
-      metaTitle
-      metaDescription
-      metaKeywords
-      canonicalUrl
-      ogTitle
-      ogDescription
-      ogImage
-      isActive
-      createdAt
-      updatedAt
+      ${SEO_FIELDS}
     }
   }
 `;
@@ -26,20 +28,7 @@ export const GET_PRODUCT_SEO_LIST = gql`
 export const GET_PRODUCT_SEO = gql`
   query GetProductSeo($productId: ID!) {
     productSeo(productId: $productId) {
-      _id
-      productId
-      productSlug
-      productName
-      metaTitle
-      metaDescription
-      metaKeywords
-      canonicalUrl
-      ogTitle
-      ogDescription
-      ogImage
-      isActive
-      createdAt
-      updatedAt
+      ${SEO_FIELDS}
     }
   }
 `;
@@ -48,18 +37,7 @@ export const GET_PRODUCT_SEO = gql`
 export const GET_PRODUCT_SEO_BY_SLUG = gql`
   query GetProductSeoBySlug($slug: String!) {
     productSeoBySlug(slug: $slug) {
-      _id
-      productId
-      productSlug
-      productName
-      metaTitle
-      metaDescription
-      metaKeywords
-      canonicalUrl
-      ogTitle
-      ogDescription
-      ogImage
-      isActive
+      ${SEO_FIELDS}
     }
   }
 `;
@@ -68,19 +46,7 @@ export const GET_PRODUCT_SEO_BY_SLUG = gql`
 export const CREATE_PRODUCT_SEO = gql`
   mutation CreateProductSeo($input: CreateProductSeoInput!) {
     createProductSeo(input: $input) {
-      _id
-      productId
-      productSlug
-      productName
-      metaTitle
-      metaDescription
-      metaKeywords
-      canonicalUrl
-      ogTitle
-      ogDescription
-      ogImage
-      isActive
-      createdAt
+      ${SEO_FIELDS}
     }
   }
 `;
@@ -89,19 +55,7 @@ export const CREATE_PRODUCT_SEO = gql`
 export const UPDATE_PRODUCT_SEO = gql`
   mutation UpdateProductSeo($id: ID!, $input: UpdateProductSeoInput!) {
     updateProductSeo(id: $id, input: $input) {
-      _id
-      productId
-      productSlug
-      productName
-      metaTitle
-      metaDescription
-      metaKeywords
-      canonicalUrl
-      ogTitle
-      ogDescription
-      ogImage
-      isActive
-      updatedAt
+      ${SEO_FIELDS}
     }
   }
 `;
