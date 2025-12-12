@@ -66,9 +66,7 @@ const allColumns: ColumnDefinition[] = [
   { key: "name", label: "Name" },
   { key: "slug", label: "Slug" },
   { key: "brand", label: "Brand" },
-  { key: "categoryId", label: "Category ID" },
-  { key: "discountPercent", label: "Discount %" },
-  { key: "thumbnailUrl", label: "Thumbnail" },
+  { key: "categoryName", label: "Category Name" },
   { key: "isVegetarian", label: "Vegetarian" },
   { key: "isGlutenFree", label: "Gluten Free" },
   { key: "favourite", label: "Favourite" },
@@ -326,21 +324,9 @@ export default function ProductsPage() {
                                   )
                                 }
                               />
-                            ) : columnKey === "thumbnailUrl" ? (
-                              product.thumbnailUrl ? (
-                                <button
-                                  onClick={() =>
-                                    setImagePreview({
-                                      url: String(product.thumbnailUrl || ""),
-                                      title: "Product Thumbnail",
-                                    })
-                                  }
-                                  className="text-blue-600 hover:text-blue-800 underline text-left max-w-[200px] truncate block"
-                                >
-                                  View Image
-                                </button>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
+                            ) : columnKey === "categoryName" ? (
+                              product?.category?.name && (
+                                <span className="text-muted-foreground">{product.category.name}</span>
                               )
                             ) : columnKey === "isVegetarian" ||
                               columnKey === "isGlutenFree" ? (

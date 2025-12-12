@@ -95,20 +95,24 @@ export const GET_PRODUCTS = gql`
   }
 `
 
-// Minimal product query for SEO page (avoids numeric fields that may return Infinity)
-export const GET_PRODUCTS_MINIMAL = gql`
-  query GetProductsMinimal($pagination: PaginationInput!, $includeOutOfStock: Boolean!) {
+// Product query for SEO page - includes SEO field and minimal info needed
+export const GET_PRODUCTS_FOR_SEO = gql`
+  query GetProductsForSeo($pagination: PaginationInput!, $includeOutOfStock: Boolean!) {
     products(pagination: $pagination, includeOutOfStock: $includeOutOfStock) {
       items {
         _id
         name
         slug
+        description
         brand
         isArchived
         category {
           id
           name
           slug
+        }
+        seo {
+          ${SEO_FIELDS}
         }
       }
       meta {
@@ -118,6 +122,19 @@ export const GET_PRODUCTS_MINIMAL = gql`
         totalPages
         hasNextPage
         hasPreviousPage
+      }
+    }
+  }
+`
+
+// Update product SEO via updateProduct mutation
+export const UPDATE_PRODUCT_SEO = gql`
+  mutation UpdateProductSeo($id: ID!, $input: UpdateProductInput!) {
+    updateProduct(id: $id, input: $input) {
+      _id
+      name
+      seo {
+        ${SEO_FIELDS}
       }
     }
   }

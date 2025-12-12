@@ -17,8 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Product } from "@/lib/products/useProducts";
-import { ProductSeo } from "@/lib/product-seo/useProductSeo";
+import { Product, ProductSeo } from "@/lib/products/useProducts";
 
 interface ProductSeoStatus {
   productId: string;

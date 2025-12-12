@@ -16,10 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { productSeoSchema, ProductSeoFormData } from "@/lib/validations/product-seo.schema";
-import { ProductSeo, useCreateProductSeo, useUpdateProductSeo } from "@/lib/product-seo/useProductSeo";
 import { Badge } from "@/components/ui/badge";
 import { Package } from "lucide-react";
-import { Product } from "@/lib/products/useProducts";
+import { Product, ProductSeo, useUpdateProductSeo } from "@/lib/products/useProducts";
 import { TagInput } from "@/components/custom/tag-input";
 
 interface ProductSeoFormProps {
@@ -30,9 +29,8 @@ interface ProductSeoFormProps {
 }
 
 export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: ProductSeoFormProps) {
-  const { createProductSeo, loading: createLoading } = useCreateProductSeo();
-  const { updateProductSeo, loading: updateLoading } = useUpdateProductSeo();
-  const isLoading = createLoading || updateLoading;
+  // Use updateProduct mutation for SEO updates (SEO is embedded in product)
+  const { updateProductSeo, loading: isLoading } = useUpdateProductSeo();
 
   // Generate default meta title from product name
   const defaultMetaTitle = `${product.name}${product.brand ? ` | ${product.brand}` : ""} - Buy Online`;
@@ -41,7 +39,7 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
   const stripHtml = (html: string) => html?.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim() || "";
   const defaultMetaDescription = stripHtml(product.description || "").substring(0, 155);
 
-  // Use existingSeo passed from parent (fetched separately)
+  // Use existingSeo passed from parent (embedded in product)
   const seoData = existingSeo;
 
   const form = useForm<ProductSeoFormData>({
@@ -63,8 +61,8 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
 
   const handleSubmit = async (data: ProductSeoFormData) => {
     try {
-      const cleanedData = {
-        productId: data.productId,
+      // Update SEO via updateProduct mutation (SEO is embedded in product)
+      const seoInput = {
         metaTitle: data.metaTitle,
         metaDescription: data.metaDescription,
         metaKeywords: data.metaKeywords || [],
@@ -74,11 +72,7 @@ export function ProductSeoForm({ product, existingSeo, onSuccess, onCancel }: Pr
         ogImage: data.ogImage || undefined,
       };
 
-      if (seoData?._id) {
-        await updateProductSeo(seoData._id, cleanedData);
-      } else {
-        await createProductSeo(cleanedData);
-      }
+      await updateProductSeo(product._id, seoInput);
       onSuccess();
     } catch (error) {
       console.error("Failed to save product SEO:", error);

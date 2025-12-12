@@ -1,7 +1,8 @@
 import { useMutation, useQuery } from '@apollo/client/react'
 import {
   GET_PRODUCTS,
-  GET_PRODUCTS_MINIMAL,
+  GET_PRODUCTS_FOR_SEO,
+  UPDATE_PRODUCT_SEO,
   GET_PRODUCT,
   GET_PRODUCT_BY_SLUG,
   GET_PRODUCTS_BY_CATEGORY,
@@ -183,12 +184,43 @@ export const useProducts = (pagination: PaginationInput = { page: 1, limit: 10 }
   })
 }
 
-// Minimal products query for SEO page - avoids numeric fields that may return Infinity
-export const useProductsMinimal = (pagination: PaginationInput = { page: 1, limit: 10 }, includeOutOfStock: boolean = false) => {
-  return useQuery(GET_PRODUCTS_MINIMAL, {
+// Products query for SEO page - includes SEO field embedded in product
+export const useProductsForSeo = (pagination: PaginationInput = { page: 1, limit: 10 }, includeOutOfStock: boolean = false) => {
+  return useQuery(GET_PRODUCTS_FOR_SEO, {
     variables: { pagination, includeOutOfStock },
     fetchPolicy: 'cache-and-network',
   })
+}
+
+// Update product SEO via updateProduct mutation
+export interface ProductSeoInput {
+  metaTitle?: string
+  metaDescription?: string
+  metaKeywords?: string[]
+  canonicalUrl?: string
+  ogTitle?: string
+  ogDescription?: string
+  ogImage?: string
+}
+
+export const useUpdateProductSeo = () => {
+  const [mutate, { loading, error }] = useMutation(UPDATE_PRODUCT_SEO, {
+    refetchQueries: [{ query: GET_PRODUCTS_FOR_SEO, variables: { pagination: { page: 1, limit: 20 }, includeOutOfStock: true } }],
+    onError: (error: any) => {
+      console.error('Update product SEO error:', error)
+    },
+  })
+
+  const updateProductSeo = async (productId: string, seoInput: ProductSeoInput) => {
+    return mutate({
+      variables: {
+        id: productId,
+        input: { seo: seoInput }
+      }
+    })
+  }
+
+  return { updateProductSeo, loading, error }
 }
 
 export const useProduct = (id: string) => {

@@ -527,27 +527,56 @@ export function ProductForm({ onClose, initialData, createProduct, updateProduct
                                 step="1" 
                                 min="1" 
                                 {...field}
-                                onChange={e => field.onChange(Number(e.target.value))}
+                                onChange={e => {
+                                  const mrp = Number(e.target.value);
+                                  field.onChange(mrp);
+                                  // Calculate discount percentage
+                                  const price = form.getValues(`variants.${index}.price`);
+                                  if (mrp > 0 && price > 0) {
+                                    const discount = Math.round(((mrp - price) / mrp) * 100);
+                                    form.setValue(`variants.${index}.discountPercent`, Math.max(0, discount));
+                                  }
+                                }}
                               />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
-                        <FormField control={form.control} name={`variants.${index}.price`} render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Selling Price *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number" 
-                                step="1" 
-                                min="1"
-                                {...field}
-                                onChange={e => field.onChange(Number(e.target.value))}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
+                        <FormField control={form.control} name={`variants.${index}.price`} render={({ field }) => {
+                          const mrp = form.watch(`variants.${index}.mrp`);
+                          const isPriceInvalid = field.value > mrp && mrp > 0;
+                          return (
+                            <FormItem>
+                              <FormLabel>Selling Price *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  step="1" 
+                                  min="1"
+                                  max={mrp || undefined}
+                                  className={isPriceInvalid ? "border-destructive focus-visible:ring-destructive" : ""}
+                                  {...field}
+                                  onChange={e => {
+                                    const price = Number(e.target.value);
+                                    field.onChange(price);
+                                    // Calculate discount percentage
+                                    const currentMrp = form.getValues(`variants.${index}.mrp`);
+                                    if (currentMrp > 0 && price > 0) {
+                                      const discount = Math.round(((currentMrp - price) / currentMrp) * 100);
+                                      form.setValue(`variants.${index}.discountPercent`, Math.max(0, discount));
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              {isPriceInvalid && (
+                                <p className="text-sm font-medium text-destructive">
+                                  Selling Price cannot be greater than MRP
+                                </p>
+                              )}
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }} />
                         <FormField control={form.control} name={`variants.${index}.discountPercent`} render={({ field }) => (
                           <FormItem>
                             <FormLabel>Discount %</FormLabel>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useProductSeoList, useDeleteProductSeo, ProductSeo } from "@/lib/product-seo/useProductSeo";
-import { useProductsMinimal, Product } from "@/lib/products/useProducts";
+import { useProductsForSeo, useUpdateProductSeo, Product, ProductSeo } from "@/lib/products/useProducts";
 
 interface ProductSeoStatus {
   productId: string;
@@ -22,43 +21,42 @@ export function useProductSeoPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(20);
 
-  // Fetch products (minimal query to avoid Infinity error on numeric fields)
-  const { data: productsData, loading: productsLoading, error: productsError, refetch: refetchProducts } = useProductsMinimal(
+  // Fetch products with embedded SEO data
+  const { data: productsData, loading: productsLoading, error: productsError, refetch: refetchProducts } = useProductsForSeo(
     { page: currentPage, limit: pageSize },
     true // Include out of stock products
   );
   
-  // Fetch SEO data separately
-  const { productSeoList, loading: seoLoading, refetch: refetchSeo } = useProductSeoList();
-  const { deleteProductSeo, loading: deleteLoading } = useDeleteProductSeo();
+  // Update product SEO hook (uses updateProduct mutation)
+  const { updateProductSeo, loading: updateLoading } = useUpdateProductSeo();
 
   // Extract products from query result with proper typing
   const productsResponse = (productsData as any)?.products;
   const products: Product[] = productsResponse?.items || [];
   const paginationMeta = productsResponse?.meta;
 
-  // Create a map of product ID to SEO status for quick lookup
+  // Create a map of product ID to SEO status for quick lookup (using embedded seo from product)
   const seoStatusMap = useMemo(() => {
     const map = new Map<string, ProductSeoStatus>();
     
-    if (productSeoList) {
-      productSeoList.forEach((seo: ProductSeo) => {
-        map.set(seo.productId, {
-          productId: seo.productId,
+    products.forEach((product: Product) => {
+      if (product.seo && product.seo.metaTitle) {
+        map.set(product._id, {
+          productId: product._id,
           hasSeo: true,
-          metaTitle: seo.metaTitle,
-          seoData: seo,
+          metaTitle: product.seo.metaTitle,
+          seoData: product.seo,
         });
-      });
-    }
+      }
+    });
     
     return map;
-  }, [productSeoList]);
+  }, [products]);
 
   // Calculate statistics
   const stats = useMemo(() => {
     const totalProducts = paginationMeta?.totalCount || products.length;
-    const configuredCount = productSeoList?.length || 0;
+    const configuredCount = products.filter((p: Product) => p.seo && p.seo.metaTitle).length;
     const notConfiguredCount = totalProducts - configuredCount;
 
     return {
@@ -69,7 +67,7 @@ export function useProductSeoPage() {
         ? Math.round((configuredCount / totalProducts) * 100) 
         : 0,
     };
-  }, [products, productSeoList, paginationMeta]);
+  }, [products, paginationMeta]);
 
   // Filter products based on search and status
   const filteredProducts = useMemo(() => {
@@ -83,8 +81,8 @@ export function useProductSeoPage() {
         product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      // Status filter - check SEO map
-      const hasSeo = seoStatusMap.has(product._id);
+      // Status filter - use embedded seo
+      const hasSeo = !!(product.seo && product.seo.metaTitle);
       const matchesStatus =
         filterStatus === "all" ||
         (filterStatus === "configured" && hasSeo) ||
@@ -92,22 +90,20 @@ export function useProductSeoPage() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [products, searchTerm, filterStatus, seoStatusMap]);
+  }, [products, searchTerm, filterStatus]);
 
   // Handlers
   const handleEditSeo = (product: Product) => {
     setSelectedProduct(product);
-    // Get SEO from seoStatusMap
-    const seoStatus = seoStatusMap.get(product._id);
-    setSelectedSeoData(seoStatus?.seoData || null);
+    // Use embedded SEO from product
+    setSelectedSeoData(product.seo || null);
     setIsFormOpen(true);
   };
 
   const handleDeleteSeo = (product: Product) => {
     setSelectedProduct(product);
-    // Get SEO from seoStatusMap
-    const seoStatus = seoStatusMap.get(product._id);
-    setSelectedSeoData(seoStatus?.seoData || null);
+    // Use embedded SEO from product
+    setSelectedSeoData(product.seo || null);
     setIsDeleteDialogOpen(true);
   };
 
@@ -125,23 +121,32 @@ export function useProductSeoPage() {
 
   const handleFormSuccess = () => {
     handleCloseForm();
-    refetchSeo(); // Refetch SEO data
+    refetchProducts(); // Refetch products to get updated SEO
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedSeoData?._id) return;
+    if (!selectedProduct?._id) return;
 
     try {
-      await deleteProductSeo(selectedSeoData._id);
+      // To "delete" SEO, we set all SEO fields to null/empty via updateProduct
+      await updateProductSeo(selectedProduct._id, {
+        metaTitle: "",
+        metaDescription: "",
+        metaKeywords: [],
+        canonicalUrl: "",
+        ogTitle: "",
+        ogDescription: "",
+        ogImage: "",
+      });
       handleCloseDeleteDialog();
-      refetchSeo(); // Refetch SEO data
+      refetchProducts(); // Refetch products to get updated SEO
     } catch (error) {
       console.error("Failed to delete product SEO:", error);
     }
   };
 
   // Loading and error states
-  const isLoading = productsLoading || seoLoading;
+  const isLoading = productsLoading;
   const error = productsError;
 
   return {
@@ -152,7 +157,7 @@ export function useProductSeoPage() {
     
     // Loading states
     isLoading,
-    deleteLoading,
+    deleteLoading: updateLoading,
     error,
     
     // Form dialog state
@@ -178,7 +183,6 @@ export function useProductSeoPage() {
     handleConfirmDelete,
     
     // Refetch
-    refetchSeo,
     refetchProducts,
 
     // Pagination

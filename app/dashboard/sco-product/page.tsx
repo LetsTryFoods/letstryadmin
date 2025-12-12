@@ -52,7 +52,6 @@ export default function ProductSeoPage() {
     handleConfirmDelete,
     
     // Refetch
-    refetchSeo,
     refetchProducts,
 
     // Pagination
@@ -63,7 +62,6 @@ export default function ProductSeoPage() {
   } = useProductSeoPage();
 
   const handleRefresh = () => {
-    refetchSeo();
     refetchProducts();
   };
 
