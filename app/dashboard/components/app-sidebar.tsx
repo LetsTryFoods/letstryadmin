@@ -11,7 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LogOut, Image, FolderTree, Tag, DollarSign } from "lucide-react"
+import { LogOut, Image, FolderTree, Tag, DollarSign, ShoppingBag, ShoppingCart, Users, Star, Bell, BarChart3, HelpCircle, MessageSquare } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Package, Settings, LayoutDashboard, Truck, RefreshCcw, FileText, Trash2, Search, } from "lucide-react"
 import { usePolicies, useDeletePolicy } from "@/lib/policies/usePolicies"
@@ -78,6 +78,46 @@ const items = [
     title: "Charges",
     url: "/dashboard/charges",
     icon: DollarSign,
+  },
+  {
+    title: "Customers",
+    url: "/dashboard/customers",
+    icon: Users,
+  },
+  {
+    title: "Abandoned Carts",
+    url: "/dashboard/cards",
+    icon: ShoppingCart,
+  },
+  {
+    title: "Orders",
+    url: "/dashboard/orders",
+    icon: ShoppingBag,
+  },
+  {
+    title: "Reviews",
+    url: "/dashboard/reviews",
+    icon: Star,
+  },
+  {
+    title: "Notifications",
+    url: "/dashboard/notifications",
+    icon: Bell,
+  },
+  {
+    title: "Reports",
+    url: "/dashboard/reports",
+    icon: BarChart3,
+  },
+  {
+    title: "FAQ",
+    url: "/dashboard/faq",
+    icon: HelpCircle,
+  },
+  {
+    title: "Contact Queries",
+    url: "/dashboard/contact",
+    icon: MessageSquare,
   }
 ]
 

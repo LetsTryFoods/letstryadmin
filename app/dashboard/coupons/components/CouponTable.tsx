@@ -33,18 +33,18 @@ export function CouponTable({ coupons, onDelete }: CouponTableProps) {
   const isExpired = (endDate: string) => new Date(endDate) < new Date()
   const isUpcoming = (startDate: string) => new Date(startDate) > new Date()
 
-  const getStatusBadge = (coupon: Coupon) => {
-    if (!coupon.isActive) {
-      return <Badge variant="secondary">Inactive</Badge>
-    }
-    if (isExpired(coupon.endDate)) {
-      return <Badge variant="destructive">Expired</Badge>
-    }
-    if (isUpcoming(coupon.startDate)) {
-      return <Badge variant="outline">Upcoming</Badge>
-    }
-    return <Badge variant="default" className="bg-green-600">Active</Badge>
-  }
+  // const getStatusBadge = (coupon: Coupon) => {
+  //   if (!coupon.isActive) {
+  //     return <Badge variant="secondary">Inactive</Badge>
+  //   }
+  //   if (isExpired(coupon.endDate)) {
+  //     return <Badge variant="destructive">Expired</Badge>
+  //   }
+  //   if (isUpcoming(coupon.startDate)) {
+  //     return <Badge variant="outline">Upcoming</Badge>
+  //   }
+  //   return <Badge variant="default" className="bg-green-600">Active</Badge>
+  // }
 
   const getDiscountDisplay = (coupon: Coupon) => {
     if (coupon.discountType === 'PERCENTAGE') {
@@ -53,18 +53,18 @@ export function CouponTable({ coupons, onDelete }: CouponTableProps) {
     return `₹${coupon.discountValue}`
   }
 
-//   const getEligibilityBadge = (type: string) => {
-//     switch (type) {
-//       case 'ALL':
-//         return <Badge variant="outline">All Users</Badge>
-//       case 'FIRST_ORDER':
-//         return <Badge variant="outline" className="border-blue-500 text-blue-500">First Order</Badge>
-//       case 'SPECIFIC_USERS':
-//         return <Badge variant="outline" className="border-purple-500 text-purple-500">Specific Users</Badge>
-//       default:
-//         return <Badge variant="outline">{type}</Badge>
-//     }
-//   }
+  // const getEligibilityBadge = (type: string) => {
+  //   switch (type) {
+  //     case 'ALL':
+  //       return <Badge variant="outline">All Users</Badge>
+  //     case 'FIRST_ORDER':
+  //       return <Badge variant="outline" className="border-blue-500 text-blue-500">First Order</Badge>
+  //     case 'SPECIFIC_USERS':
+  //       return <Badge variant="outline" className="border-purple-500 text-purple-500">Specific Users</Badge>
+  //     default:
+  //       return <Badge variant="outline">{type}</Badge>
+  //   }
+  // }
 
   if (coupons.length === 0) {
     return (
