@@ -47,8 +47,8 @@ export interface ReportsData {
   categorySales: CategorySales[]
 }
 
-// Generate dummy daily sales data for the last 30 days
-const generateDailySales = (): DailySales[] => {
+// Generate dummy daily sales data ONCE at module load
+const staticDailySales: DailySales[] = (() => {
   const sales: DailySales[] = []
   const today = new Date()
   
@@ -56,10 +56,9 @@ const generateDailySales = (): DailySales[] => {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
     
-    // Random orders between 5-25 per day
-    const orders = Math.floor(Math.random() * 20) + 5
-    // Average order value between 400-800
-    const avgValue = Math.floor(Math.random() * 400) + 400
+    // Fixed seed-like values based on day index for consistency
+    const orders = 5 + (i % 20) + Math.floor(i / 3)
+    const avgValue = 400 + (i * 13) % 400
     
     sales.push({
       date: date.toISOString().split('T')[0],
@@ -69,7 +68,7 @@ const generateDailySales = (): DailySales[] => {
   }
   
   return sales
-}
+})()
 
 // Dummy top products data
 const dummyTopProducts: TopProduct[] = [
@@ -179,15 +178,12 @@ const dummyCategorySales: CategorySales[] = [
   { category: 'Other Pickles', revenue: 35000, percentage: 13 }
 ]
 
-// Hook to get reports data
-export const useReports = (period: 'week' | 'month' | 'quarter' | 'year' = 'month') => {
-  const dailySales = generateDailySales()
+// Pre-calculate summary from static daily sales
+const staticSummary: ReportSummary = (() => {
+  const totalRevenue = staticDailySales.reduce((sum, d) => sum + d.revenue, 0)
+  const totalOrders = staticDailySales.reduce((sum, d) => sum + d.orders, 0)
   
-  // Calculate summary from daily sales
-  const totalRevenue = dailySales.reduce((sum, d) => sum + d.revenue, 0)
-  const totalOrders = dailySales.reduce((sum, d) => sum + d.orders, 0)
-  
-  const summary: ReportSummary = {
+  return {
     totalRevenue,
     totalOrders,
     totalCustomers: 1250,
@@ -196,21 +192,29 @@ export const useReports = (period: 'week' | 'month' | 'quarter' | 'year' = 'mont
     ordersGrowth: 12.3,
     customersGrowth: 8.7
   }
+})()
 
-  const reportsData: ReportsData = {
-    summary,
-    dailySales,
-    topProducts: dummyTopProducts,
-    topCustomers: dummyTopCustomers,
-    categorySales: dummyCategorySales
-  }
+// Pre-built static reports data
+const staticReportsData: ReportsData = {
+  summary: staticSummary,
+  dailySales: staticDailySales,
+  topProducts: dummyTopProducts,
+  topCustomers: dummyTopCustomers,
+  categorySales: dummyCategorySales
+}
 
-  return {
-    data: reportsData,
-    loading: false,
-    error: null,
-    refetch: () => Promise.resolve()
-  }
+// Static result object - never changes
+const staticResult = {
+  data: staticReportsData,
+  loading: false,
+  error: null,
+  refetch: () => Promise.resolve()
+}
+
+// Hook to get reports data
+export const useReports = (period: 'week' | 'month' | 'quarter' | 'year' = 'month') => {
+  // Return the same static reference every time
+  return staticResult
 }
 
 // Helper to format currency

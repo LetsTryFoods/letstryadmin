@@ -28,7 +28,7 @@ const statuses: (FAQStatus | "ALL")[] = ["ALL", "ACTIVE", "INACTIVE"]
 
 export default function FAQPage() {
   const { data, loading, refetch } = useFAQs()
-  const faqs = data?.faqs || []
+  const faqs = data.faqs
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<FAQCategory | "ALL">("ALL")
   const [statusFilter, setStatusFilter] = useState<FAQStatus | "ALL">("ALL")

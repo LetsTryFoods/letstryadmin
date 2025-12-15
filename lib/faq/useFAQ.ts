@@ -1,6 +1,8 @@
 // FAQ Hook with Dummy Data
 // TODO: Replace with actual GraphQL queries when backend is ready
 
+import { useMemo, useCallback, useRef } from 'react'
+
 export type FAQStatus = 'ACTIVE' | 'INACTIVE'
 export type FAQCategory = 'GENERAL' | 'ORDERS' | 'SHIPPING' | 'PAYMENT' | 'RETURNS' | 'PRODUCTS'
 
@@ -159,24 +161,42 @@ export const dummyFAQs: FAQ[] = [
   }
 ]
 
+// Pre-sorted static data - never changes
+const sortedFAQs = dummyFAQs.sort((a, b) => a.order - b.order)
+
 // Hook to get FAQs
 export const useFAQs = (category?: FAQCategory, status?: FAQStatus) => {
-  let filteredFAQs = [...dummyFAQs]
   
-  if (category) {
-    filteredFAQs = filteredFAQs.filter(faq => faq.category === category)
-  }
-  
-  if (status) {
-    filteredFAQs = filteredFAQs.filter(faq => faq.status === status)
-  }
+  const filteredFAQs = useMemo(() => {
+    if (!category && !status) {
+      return sortedFAQs
+    }
+    
+    let faqs = sortedFAQs
+    
+    if (category) {
+      faqs = faqs.filter(faq => faq.category === category)
+    }
+    
+    if (status) {
+      faqs = faqs.filter(faq => faq.status === status)
+    }
+    
+    return faqs
+  }, [category, status])
 
-  return {
-    data: { faqs: filteredFAQs.sort((a, b) => a.order - b.order) },
+  // Use ref to maintain stable reference
+  const resultRef = useRef({
+    data: { faqs: sortedFAQs },
     loading: false,
     error: null,
     refetch: () => Promise.resolve()
-  }
+  })
+
+  // Only update if filtered data actually changed
+  resultRef.current.data = { faqs: filteredFAQs }
+
+  return resultRef.current
 }
 
 // Hook to get single FAQ
