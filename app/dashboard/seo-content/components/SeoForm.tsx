@@ -24,8 +24,9 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { seoContentSchema, SeoContentFormData } from "@/lib/validations/seo.schema";
-import { SeoContent } from "@/lib/seo/useSeo";
+import { SeoContent, useActiveSeoPages, ActiveSeoPagesResponse, SeoPage } from "@/lib/seo/useSeo";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 
 interface SeoFormProps {
   initialData?: SeoContent | null;
@@ -34,25 +35,11 @@ interface SeoFormProps {
   isLoading?: boolean;
 }
 
-const PAGE_OPTIONS = [
-  { value: "home", label: "Home Page" },
-  { value: "combos", label: "Combos Page" },
-  { value: "about-us", label: "About Us" },
-  { value: "contact", label: "Contact Page" },
-  { value: "search", label: "Search Page" },
-  { value: "products", label: "Products Page" },
-  { value: "categories", label: "Categories Page" },
-  { value: "cart", label: "Cart Page" },
-  { value: "checkout", label: "Checkout Page" },
-  { value: "faq", label: "FAQ Page" },
-  { value: "privacy-policy", label: "Privacy Policy" },
-  { value: "terms-of-service", label: "Terms of Service" },
-  { value: "refund-policy", label: "Refund & Cancellations" },
-  { value: "shipping-policy", label: "Shipping Policy" },
-  { value: "address-details", label: "Address Details" },
-];
-
 export function SeoForm({ initialData, onSubmit, onCancel, isLoading }: SeoFormProps) {
+  // Fetch dynamic page options from API
+  const { data: pagesData, loading: pagesLoading } = useActiveSeoPages();
+  const pageOptions: SeoPage[] = (pagesData as ActiveSeoPagesResponse)?.activeSeoPages || [];
+
   const form = useForm<SeoContentFormData>({
     resolver: zodResolver(seoContentSchema),
     defaultValues: {
@@ -86,7 +73,7 @@ export function SeoForm({ initialData, onSubmit, onCancel, isLoading }: SeoFormP
   };
 
   const handlePageSelect = (slug: string) => {
-    const page = PAGE_OPTIONS.find((p) => p.value === slug);
+    const page = pageOptions.find((p) => p.slug === slug);
     if (page) {
       form.setValue("pageSlug", slug);
       form.setValue("pageName", page.label);
@@ -106,15 +93,22 @@ export function SeoForm({ initialData, onSubmit, onCancel, isLoading }: SeoFormP
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Page Slug *</FormLabel>
-                  <Select onValueChange={handlePageSelect} defaultValue={field.value}>
+                  <Select onValueChange={handlePageSelect} defaultValue={field.value} disabled={pagesLoading}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a page" />
+                        {pagesLoading ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Loading pages...</span>
+                          </div>
+                        ) : (
+                          <SelectValue placeholder="Select a page" />
+                        )}
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {PAGE_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
+                      {pageOptions.map((option) => (
+                        <SelectItem key={option.slug} value={option.slug}>
                           {option.label}
                         </SelectItem>
                       ))}

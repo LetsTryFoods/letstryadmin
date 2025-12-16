@@ -47,3 +47,25 @@ export const seoContentSchema = z.object({
 });
 
 export type SeoContentFormData = z.infer<typeof seoContentSchema>;
+
+// SEO Page Schema (for dynamic page options)
+export const seoPageSchema = z.object({
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .max(100, "Slug must be less than 100 characters")
+    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+  label: z
+    .string()
+    .min(1, "Label is required")
+    .max(100, "Label must be less than 100 characters"),
+  description: z
+    .string()
+    .max(500, "Description must be less than 500 characters")
+    .optional()
+    .or(z.literal("")),
+  sortOrder: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
+});
+
+export type SeoPageFormData = z.infer<typeof seoPageSchema>;
