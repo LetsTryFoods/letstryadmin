@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form"
 import { Separator } from "@/components/ui/separator"
 import { useCharges, useCreateOrUpdateCharges } from "@/lib/charges/useCharges"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { chargesFormSchema, ChargesFormValues } from "@/lib/validations/charges.schema"
 import { useEffect } from "react"
 import { Loader2, Save, IndianRupee, Percent, Truck, Package } from "lucide-react"
@@ -27,6 +28,8 @@ export default function ChargesPage() {
   const { createOrUpdateCharges, loading: updateLoading } = useCreateOrUpdateCharges()
 
   const charges = (data as any)?.charges
+
+  const { canUpdate } = usePermissionActions("charges")
 
   const form = useForm<ChargesFormValues>({
     resolver: zodResolver(chargesFormSchema),
@@ -317,21 +320,23 @@ export default function ChargesPage() {
           </div>
 
           {/* Save Button */}
-          <div className="flex justify-end">
-            <Button type="submit" disabled={updateLoading}>
-              {updateLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </div>
+          {canUpdate && (
+            <div className="flex justify-end">
+              <Button type="submit" disabled={updateLoading}>
+                {updateLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </form>
       </Form>
     </div>

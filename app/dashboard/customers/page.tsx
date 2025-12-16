@@ -26,6 +26,7 @@ import {
   CustomerStatus, 
   getCustomerStats 
 } from "@/lib/customers/useCustomers"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import CustomerTable from "./components/CustomerTable"
 
 export default function CustomersPage() {
@@ -34,6 +35,8 @@ export default function CustomersPage() {
 
   const { data, refetch } = useCustomers()
   const customers = data?.customers || []
+
+  const { canUpdate, canDelete } = usePermissionActions("customers")
 
   // Get overall stats
   const stats = useMemo(() => getCustomerStats(customers), [customers])
@@ -223,6 +226,8 @@ export default function CustomersPage() {
       <CustomerTable 
         customers={filteredCustomers} 
         onRefresh={refetch}
+        canUpdate={canUpdate}
+        canDelete={canDelete}
       />
     </div>
   )

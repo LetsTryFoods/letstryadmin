@@ -26,6 +26,7 @@ import {
   ReviewStatus, 
   getReviewStats 
 } from "@/lib/reviews/useReviews"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import ReviewTable from "./components/ReviewTable"
 
 export default function ReviewsPage() {
@@ -35,6 +36,8 @@ export default function ReviewsPage() {
 
   const { data, refetch } = useReviews()
   const reviews = data?.reviews || []
+
+  const { canUpdate, canDelete } = usePermissionActions("reviews")
 
   // Get overall stats
   const stats = useMemo(() => getReviewStats(reviews), [reviews])
@@ -288,6 +291,8 @@ export default function ReviewsPage() {
       <ReviewTable 
         reviews={filteredReviews} 
         onRefresh={refetch}
+        canUpdate={canUpdate}
+        canDelete={canDelete}
       />
     </div>
   )

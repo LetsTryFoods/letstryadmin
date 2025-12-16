@@ -15,6 +15,8 @@ interface BannerTableProps {
   onEdit: (id: string) => void
   onDelete: (id: string) => void
   onImagePreview: (url: string, title: string) => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 export function BannerTable({
@@ -24,7 +26,9 @@ export function BannerTable({
   onToggleActive,
   onEdit,
   onDelete,
-  onImagePreview
+  onImagePreview,
+  canUpdate = true,
+  canDelete = true
 }: BannerTableProps) {
   return (
     <div className="rounded-md border">
@@ -53,10 +57,14 @@ export function BannerTable({
                 {selectedColumns.map(columnKey => (
                   <TableCell key={columnKey}>
                     {columnKey === 'isActive' ? (
+                      canUpdate ? (
                       <Switch
                         checked={banner.isActive}
                         onCheckedChange={() => onToggleActive(banner._id)}
                       />
+                      ) : (
+                        banner.isActive ? "Yes" : "No"
+                      )
                     ) : columnKey === 'imageUrl' || columnKey === 'mobileImageUrl' || columnKey === 'thumbnailUrl' ? (
                       <button
                         onClick={() => onImagePreview(
@@ -82,11 +90,14 @@ export function BannerTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      {canUpdate && (
                       <DropdownMenuItem onClick={() => onEdit(banner._id)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
+                      )}
+                      {(canUpdate || canDelete) && <DropdownMenuSeparator />}
+                      {canDelete && (
                       <DropdownMenuItem 
                         onClick={() => onDelete(banner._id)}
                         className="text-destructive"
@@ -94,6 +105,7 @@ export function BannerTable({
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

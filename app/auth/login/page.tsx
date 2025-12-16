@@ -6,27 +6,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'react-hot-toast'
-import { useLogin, LoginData } from '@/lib/login/useLogin'
+import { useAdminLogin } from '@/lib/rbac/useRbac'
+import { adminLoginSchema, AdminLoginFormData } from '@/lib/validations/rbac.schema'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 export default function LoginPage() {
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
-  const [login, { loading }] = useLogin()
+  const { register, handleSubmit, formState: { errors } } = useForm<AdminLoginFormData>({
+    resolver: zodResolver(adminLoginSchema),
+  })
+  const [login, { loading }] = useAdminLogin()
 
-  const onSubmit = async (data: LoginData) => {
+  const onSubmit = async (data: AdminLoginFormData) => {
     try {
       const response = await login({
         variables: {
-          email: data.email.toLocaleLowerCase(),
-          password: data.password
+          input: {
+            email: data.email.toLowerCase(),
+            password: data.password,
+          }
         }
       })
 
-      const token = (response.data as any)?.adminLogin
+      const result = response.data?.adminUserLogin
       
-      if (token) {
-        localStorage.setItem('token', token)
-        document.cookie = `token=${token}; path=/; max-age=86400`
-        toast.success('Login successful!')
+      if (result?.accessToken) {
+        // Store token
+        localStorage.setItem('token', result.accessToken)
+        document.cookie = `token=${result.accessToken}; path=/; max-age=86400`
+        
+        // Store user info for quick access
+        localStorage.setItem('adminUser', JSON.stringify({
+          _id: result._id,
+          name: result.name,
+          email: result.email,
+          roleName: result.roleName,
+          roleSlug: result.roleSlug,
+          permissions: result.permissions,
+        }))
+        
+        toast.success(`Welcome back, ${result.name}!`)
         window.location.href = '/dashboard'
       }
     } catch (error: any) {
@@ -52,7 +70,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                {...register('email', { required: 'Email is required' })}
+                {...register('email')}
               />
               {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
             </div>
@@ -63,25 +81,22 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 placeholder="Enter your password"
-                {...register('password', { required: 'Password is required' })}
+                {...register('password')}
               />
               {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-green-600 hover:bg-green-700"
               disabled={loading}
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
-            Don't have an account?{' '}
-            <a href="/auth/register" className="text-blue-600 hover:text-blue-500">
-              Sign up
-            </a>
+          <div className="mt-4 text-center text-sm text-gray-500">
+            Default: admin@letstry.com / Admin@123
           </div>
         </CardContent>
       </Card>

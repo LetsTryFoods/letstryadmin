@@ -27,6 +27,8 @@ interface CategoryTableProps {
   onFavouriteToggle: (id: string, favourite: boolean) => void
   onEdit: (id: string) => void
   onImagePreview: (url: string, title: string) => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 export function CategoryTable({
@@ -40,7 +42,9 @@ export function CategoryTable({
   onArchiveToggle,
   onFavouriteToggle,
   onEdit,
-  onImagePreview
+  onImagePreview,
+  canUpdate = true,
+  canDelete = true
 }: CategoryTableProps) {
   if (loading) {
     return (
@@ -85,15 +89,23 @@ export function CategoryTable({
                 {selectedColumns.map(columnKey => (
                   <TableCell key={columnKey}>
                     {columnKey === 'isArchived' ? (
+                      canUpdate ? (
                       <Switch
                         checked={category.isArchived}
                         onCheckedChange={() => onArchiveToggle(category.id, category.isArchived)}
                       />
+                      ) : (
+                        category.isArchived ? "Yes" : "No"
+                      )
                     ) : columnKey === 'favourite' ? (
+                      canUpdate ? (
                       <Switch
                         checked={category.favourite}
                         onCheckedChange={() => onFavouriteToggle(category.id, category.favourite)}
                       />
+                      ) : (
+                        category.favourite ? "Yes" : "No"
+                      )
                     ) : columnKey === 'imageUrl' ? (
                       category.imageUrl ? (
                         <button
@@ -129,11 +141,14 @@ export function CategoryTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      {canUpdate && (
                       <DropdownMenuItem onClick={() => onEdit(category.id)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
+                      )}
+                      {canUpdate && <DropdownMenuSeparator />}
+                      {canUpdate && (
                       <DropdownMenuItem 
                         onClick={() => onArchiveToggle(category.id, category.isArchived)}
                         className={category.isArchived ? "text-green-600" : "text-orange-600"}
@@ -150,6 +165,7 @@ export function CategoryTable({
                           </>
                         )}
                       </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

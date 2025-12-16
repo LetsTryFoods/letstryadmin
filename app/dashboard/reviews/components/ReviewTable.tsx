@@ -51,6 +51,8 @@ import ReviewDetailsDialog from "./ReviewDetailsDialog"
 interface ReviewTableProps {
   reviews: Review[]
   onRefresh: () => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 const statusConfig: Record<ReviewStatus, { label: string; variant: "default" | "secondary" | "destructive" }> = {
@@ -59,7 +61,7 @@ const statusConfig: Record<ReviewStatus, { label: string; variant: "default" | "
   REJECTED: { label: "Rejected", variant: "destructive" }
 }
 
-export default function ReviewTable({ reviews, onRefresh }: ReviewTableProps) {
+export default function ReviewTable({ reviews, onRefresh, canUpdate = true, canDelete = true }: ReviewTableProps) {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null)
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -215,21 +217,22 @@ export default function ReviewTable({ reviews, onRefresh }: ReviewTableProps) {
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                          {review.status !== 'APPROVED' && (
+                          {canUpdate && <DropdownMenuSeparator />}
+                          {canUpdate && <DropdownMenuLabel>Change Status</DropdownMenuLabel>}
+                          {canUpdate && review.status !== 'APPROVED' && (
                             <DropdownMenuItem onClick={() => handleStatusChange(review, 'APPROVED')}>
                               <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
                               Approve
                             </DropdownMenuItem>
                           )}
-                          {review.status !== 'REJECTED' && (
+                          {canUpdate && review.status !== 'REJECTED' && (
                             <DropdownMenuItem onClick={() => handleStatusChange(review, 'REJECTED')}>
                               <XCircle className="mr-2 h-4 w-4 text-red-600" />
                               Reject
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuSeparator />
+                          {canDelete && <DropdownMenuSeparator />}
+                          {canDelete && (
                           <DropdownMenuItem 
                             onClick={() => handleDeleteReview(review)}
                             className="text-red-600"
@@ -237,6 +240,7 @@ export default function ReviewTable({ reviews, onRefresh }: ReviewTableProps) {
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Review
                           </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

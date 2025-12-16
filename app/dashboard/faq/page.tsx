@@ -20,6 +20,7 @@ import {
   Loader2
 } from "lucide-react"
 import { useFAQs, getFAQStats, FAQ, FAQCategory, FAQStatus, categoryLabels } from "@/lib/faq/useFAQ"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import FAQTable from "./components/FAQTable"
 import FAQFormDialog from "./components/FAQFormDialog"
 
@@ -34,6 +35,8 @@ export default function FAQPage() {
   const [statusFilter, setStatusFilter] = useState<FAQStatus | "ALL">("ALL")
   const [showFormDialog, setShowFormDialog] = useState(false)
   const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null)
+
+  const { canCreate, canUpdate, canDelete } = usePermissionActions("faq")
 
   const stats = useMemo(() => getFAQStats(faqs), [faqs])
 
@@ -97,10 +100,12 @@ export default function FAQPage() {
             Manage frequently asked questions for your customers
           </p>
         </div>
+        {canCreate && (
         <Button onClick={handleAddNew}>
           <Plus className="mr-2 h-4 w-4" />
           Add FAQ
         </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -237,6 +242,8 @@ export default function FAQPage() {
             faqs={filteredFAQs} 
             onRefresh={refetch} 
             onEdit={handleEdit}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
           />
         </CardContent>
       </Card>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
 import { useAddressPage } from "@/hooks/useAddressPage"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/column-selector"
 import { AddressForm } from "./components/AddressForm"
 import { AddressTable } from "./components/AddressTable"
@@ -22,6 +23,7 @@ const allColumns: ColumnDefinition[] = [
 
 export default function ManufacturingAddressPage() {
     const { state, actions } = useAddressPage()
+    const { canCreate, canUpdate, canDelete } = usePermissionActions("address")
 
     return (
         <div className="flex flex-col gap-4 mx-4 auto">
@@ -37,9 +39,11 @@ export default function ManufacturingAddressPage() {
                             selectedColumns={state.selectedColumns}
                             onColumnToggle={actions.handleColumnToggle}
                         />
+                        {canCreate && (
                         <Button onClick={actions.handleAddAddress}>
                             <Plus className="mr-2 h-4 w-4" /> Add Address
                         </Button>
+                        )}
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -54,6 +58,8 @@ export default function ManufacturingAddressPage() {
                         onActiveToggle={actions.handleActiveToggle}
                         onEdit={actions.handleEdit}
                         onDelete={actions.handleDelete}
+                        canUpdate={canUpdate}
+                        canDelete={canDelete}
                     />
                 </CardContent>
             </Card>

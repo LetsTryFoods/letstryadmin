@@ -19,6 +19,7 @@ import {
   Order, 
   OrderStatus 
 } from "@/lib/orders/useOrders"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { OrderTable } from "./components/OrderTable"
 import { OrderDetailsDialog } from "./components/OrderDetailsDialog"
 import { 
@@ -44,6 +45,8 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+
+  const { canUpdate } = usePermissionActions("orders")
 
   const orders: Order[] = (data as any)?.orders || []
   const stats = getOrderStats(dummyOrders)
@@ -279,6 +282,7 @@ export default function OrdersPage() {
             orders={filteredOrders}
             onViewDetails={handleViewDetails}
             onUpdateStatus={handleUpdateStatus}
+            canUpdate={canUpdate}
           />
         </CardContent>
       </Card>

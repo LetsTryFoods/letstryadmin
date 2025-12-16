@@ -26,9 +26,10 @@ interface CartTableProps {
   onViewDetails: (cart: AbandonedCart) => void
   onSendWhatsApp: (cart: AbandonedCart) => void
   onSendSMS: (cart: AbandonedCart) => void
+  canUpdate?: boolean
 }
 
-export function CartTable({ carts, onViewDetails, onSendWhatsApp, onSendSMS }: CartTableProps) {
+export function CartTable({ carts, onViewDetails, onSendWhatsApp, onSendSMS, canUpdate = true }: CartTableProps) {
   const getActivityBadge = (lastActivity: string) => {
     const now = new Date()
     const activityDate = new Date(lastActivity)
@@ -136,37 +137,41 @@ export function CartTable({ carts, onViewDetails, onSendWhatsApp, onSendSMS }: C
                     </Tooltip>
                   </TooltipProvider>
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="default"
-                          size="icon"
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={() => onSendWhatsApp(cart)}
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Send WhatsApp Reminder</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {canUpdate && (
+                    <>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="default"
+                              size="icon"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => onSendWhatsApp(cart)}
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Send WhatsApp Reminder</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="border-blue-500 text-blue-600 hover:bg-blue-50"
-                          onClick={() => onSendSMS(cart)}
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Send SMS Notification</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                              onClick={() => onSendSMS(cart)}
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Send SMS Notification</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

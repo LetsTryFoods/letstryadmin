@@ -53,6 +53,7 @@ import NotificationDetailsDialog from "./NotificationDetailsDialog"
 interface NotificationTableProps {
   notifications: Notification[]
   onRefresh: () => void
+  canDelete?: boolean
 }
 
 const statusConfig: Record<NotificationStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -68,7 +69,7 @@ const typeConfig: Record<NotificationType, { label: string; icon: typeof Bell }>
   SMS: { label: "SMS", icon: MessageSquare }
 }
 
-export default function NotificationTable({ notifications, onRefresh }: NotificationTableProps) {
+export default function NotificationTable({ notifications, onRefresh, canDelete = true }: NotificationTableProps) {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -196,7 +197,8 @@ export default function NotificationTable({ notifications, onRefresh }: Notifica
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
+                          {canDelete && <DropdownMenuSeparator />}
+                          {canDelete && (
                           <DropdownMenuItem 
                             onClick={() => handleDeleteNotification(notification)}
                             className="text-red-600"
@@ -204,6 +206,7 @@ export default function NotificationTable({ notifications, onRefresh }: Notifica
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

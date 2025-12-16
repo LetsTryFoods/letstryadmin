@@ -17,6 +17,7 @@ import {
   getAbandonedCartStats, 
   AbandonedCart 
 } from "@/lib/abandoned-carts/useAbandonedCarts"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { CartTable } from "./components/CartTable"
 import { CartDetailsDialog } from "./components/CartDetailsDialog"
 import { WhatsAppDialog } from "./components/WhatsAppDialog"
@@ -42,6 +43,8 @@ export default function AbandonedCartsPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false)
   const [isSMSOpen, setIsSMSOpen] = useState(false)
+
+  const { canUpdate } = usePermissionActions("cards")
 
   const carts: AbandonedCart[] = (data as any)?.abandonedCarts || []
   const stats = getAbandonedCartStats(dummyAbandonedCarts)
@@ -263,6 +266,7 @@ export default function AbandonedCartsPage() {
             onViewDetails={handleViewDetails}
             onSendWhatsApp={handleSendWhatsApp}
             onSendSMS={handleSendSMS}
+            canUpdate={canUpdate}
           />
         </CardContent>
       </Card>

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/column-selector"
 import { ImagePreviewDialog } from "@/app/dashboard/components/image-preview-dialog"
 import { useBannerPage } from "@/hooks/useBannerPage"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { BannerForm } from "./components/BannerForm"
 import { BannerTable } from "./components/BannerTable"
 import { DeleteBannerDialog } from "./components/DeleteBannerDialog"
@@ -54,12 +55,14 @@ export default function BannersPage() {
     handleToggleActive,
     handleImagePreview
   } = useBannerPage()
+  const { canCreate, canUpdate, canDelete } = usePermissionActions("banners")
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Banners</h2>
         <div className="flex items-center space-x-2">
+          {canCreate && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleAddBanner}>Add Banner</Button>
@@ -76,6 +79,7 @@ export default function BannersPage() {
               />
             </DialogContent>
           </Dialog>
+          )}
         </div>
       </div>
 
@@ -103,6 +107,8 @@ export default function BannersPage() {
             onEdit={handleEdit}
             onDelete={handleDeleteClick}
             onImagePreview={handleImagePreview}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
           />
         )}
       </div>

@@ -49,6 +49,8 @@ interface FAQTableProps {
   faqs: FAQ[]
   onRefresh: () => void
   onEdit: (faq: FAQ) => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 const statusConfig: Record<FAQStatus, { label: string; variant: "default" | "secondary" }> = {
@@ -56,7 +58,7 @@ const statusConfig: Record<FAQStatus, { label: string; variant: "default" | "sec
   INACTIVE: { label: "Inactive", variant: "secondary" }
 }
 
-export default function FAQTable({ faqs, onRefresh, onEdit }: FAQTableProps) {
+export default function FAQTable({ faqs, onRefresh, onEdit, canUpdate = true, canDelete = true }: FAQTableProps) {
   const [selectedFAQ, setSelectedFAQ] = useState<FAQ | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showStatusDialog, setShowStatusDialog] = useState(false)
@@ -151,10 +153,13 @@ export default function FAQTable({ faqs, onRefresh, onEdit }: FAQTableProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          {canUpdate && (
                           <DropdownMenuItem onClick={() => onEdit(faq)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
+                          )}
+                          {canUpdate && (
                           <DropdownMenuItem onClick={() => handleStatusToggle(faq)}>
                             {faq.status === 'ACTIVE' ? (
                               <>
@@ -168,7 +173,9 @@ export default function FAQTable({ faqs, onRefresh, onEdit }: FAQTableProps) {
                               </>
                             )}
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
+                          )}
+                          {(canUpdate || canDelete) && <DropdownMenuSeparator />}
+                          {canDelete && (
                           <DropdownMenuItem 
                             onClick={() => handleDelete(faq)}
                             className="text-red-600"
@@ -176,6 +183,7 @@ export default function FAQTable({ faqs, onRefresh, onEdit }: FAQTableProps) {
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

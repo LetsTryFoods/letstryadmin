@@ -26,6 +26,8 @@ interface AddressTableProps {
   onActiveToggle: (id: string, isActive: boolean) => void
   onEdit: (id: string) => void
   onDelete: (id: string, batchCode: string) => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 export function AddressTable({
@@ -38,7 +40,9 @@ export function AddressTable({
   onPageChange,
   onActiveToggle,
   onEdit,
-  onDelete
+  onDelete,
+  canUpdate = true,
+  canDelete = true
 }: AddressTableProps) {
   if (loading) {
     return (
@@ -83,10 +87,14 @@ export function AddressTable({
                 {selectedColumns.map(columnKey => (
                   <TableCell key={columnKey}>
                     {columnKey === 'isActive' ? (
+                      canUpdate ? (
                       <Switch
                         checked={address.isActive}
                         onCheckedChange={() => onActiveToggle(address._id, address.isActive)}
                       />
+                      ) : (
+                        address.isActive ? "Yes" : "No"
+                      )
                     ) : columnKey === 'subAddressHeading' ? (
                       <div className="max-w-[300px] truncate" title={address.subAddressHeading}>
                         {address.subAddressHeading}
@@ -110,11 +118,14 @@ export function AddressTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      {canUpdate && (
                       <DropdownMenuItem onClick={() => onEdit(address._id)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
+                      )}
+                      {(canUpdate || canDelete) && <DropdownMenuSeparator />}
+                      {canDelete && (
                       <DropdownMenuItem 
                         onClick={() => onDelete(address._id, address.batchCode)}
                         className="text-destructive"
@@ -122,6 +133,7 @@ export function AddressTable({
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

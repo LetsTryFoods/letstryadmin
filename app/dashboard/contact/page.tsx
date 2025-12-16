@@ -32,6 +32,7 @@ import {
   typeLabels,
   priorityLabels
 } from "@/lib/contact/useContact"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import ContactTable from "./components/ContactTable"
 import ContactDetailsDialog from "./components/ContactDetailsDialog"
 import ContactReplyDialog from "./components/ContactReplyDialog"
@@ -50,6 +51,8 @@ export default function ContactPage() {
   const [selectedQuery, setSelectedQuery] = useState<ContactQuery | null>(null)
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [showReplyDialog, setShowReplyDialog] = useState(false)
+
+  const { canUpdate, canDelete } = usePermissionActions("contact")
 
   const stats = useMemo(() => getContactStats(queries), [queries])
 
@@ -315,6 +318,8 @@ export default function ContactPage() {
             onRefresh={refetch}
             onView={handleView}
             onReply={handleReply}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
           />
         </CardContent>
       </Card>

@@ -30,6 +30,7 @@ import {
   NotificationType,
   getNotificationStats 
 } from "@/lib/notifications/useNotifications"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import NotificationTable from "./components/NotificationTable"
 import SendNotificationDialog from "./components/SendNotificationDialog"
 
@@ -38,6 +39,8 @@ export default function NotificationsPage() {
   const [statusFilter, setStatusFilter] = useState<NotificationStatus | "ALL">("ALL")
   const [typeFilter, setTypeFilter] = useState<NotificationType | "ALL">("ALL")
   const [showSendDialog, setShowSendDialog] = useState(false)
+
+  const { canCreate, canUpdate, canDelete } = usePermissionActions("notifications")
 
   const { data, refetch } = useNotifications()
   const notifications = data?.notifications || []
@@ -75,10 +78,12 @@ export default function NotificationsPage() {
             Send and manage notifications to your customers
           </p>
         </div>
+        {canCreate && (
         <Button onClick={() => setShowSendDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Send Notification
         </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -259,6 +264,7 @@ export default function NotificationsPage() {
       <NotificationTable 
         notifications={filteredNotifications} 
         onRefresh={refetch}
+        canDelete={canDelete}
       />
 
       {/* Send Notification Dialog */}

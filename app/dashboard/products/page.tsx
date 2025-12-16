@@ -53,6 +53,7 @@ import {
   useUnarchiveProduct,
   useDeleteProduct,
 } from "@/lib/products/useProducts";
+import { usePermissionActions } from "@/lib/rbac/AuthContext";
 import {
   ColumnSelector,
   ColumnDefinition,
@@ -98,6 +99,9 @@ export default function ProductsPage() {
   } | null>(null);
 
   const [showArchived, setShowArchived] = useState(false);
+
+  // Permission checks for products page
+  const { canCreate, canUpdate, canDelete } = usePermissionActions("products");
 
   const {
     data: productsData,
@@ -236,6 +240,7 @@ export default function ProductsPage() {
               Show Archived
             </label>
           </div>
+          {canCreate && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleAddProduct}>Add Product</Button>
@@ -254,6 +259,7 @@ export default function ProductsPage() {
               />
             </DialogContent>
           </Dialog>
+          )}
         </div>
       </div>
 
@@ -315,6 +321,7 @@ export default function ProductsPage() {
                                 {product.name}
                               </Link>
                             ) : columnKey === "isArchived" ? (
+                              canUpdate ? (
                               <Switch
                                 checked={product.isArchived}
                                 onCheckedChange={() =>
@@ -324,6 +331,9 @@ export default function ProductsPage() {
                                   )
                                 }
                               />
+                              ) : (
+                                product.isArchived ? "Yes" : "No"
+                              )
                             ) : columnKey === "categoryName" ? (
                               product?.category?.name && (
                                 <span className="text-muted-foreground">{product.category.name}</span>
@@ -336,6 +346,7 @@ export default function ProductsPage() {
                                 "✗"
                               )
                             ) : columnKey === "favourite" ? (
+                              canUpdate ? (
                               <Switch
                                 checked={product.favourite}
                                 onCheckedChange={() =>
@@ -345,6 +356,9 @@ export default function ProductsPage() {
                                   )
                                 }
                               />
+                              ) : (
+                                product.favourite ? "Yes" : "No"
+                              )
                             ) : (
                               <div className="max-w-[200px] truncate">
                                 {String(
@@ -365,13 +379,16 @@ export default function ProductsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              {canUpdate && (
                               <DropdownMenuItem
                                 onClick={() => handleEdit(product._id)}
                               >
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
+                              )}
+                              {(canUpdate || canDelete) && <DropdownMenuSeparator />}
+                              {canUpdate && (
                               <DropdownMenuItem
                                 onClick={() =>
                                   handleAction(
@@ -400,6 +417,8 @@ export default function ProductsPage() {
                                   </>
                                 )}
                               </DropdownMenuItem>
+                              )}
+                              {canDelete && (
                               <DropdownMenuItem
                                 onClick={() =>
                                   handleAction(product._id, "delete")
@@ -409,6 +428,7 @@ export default function ProductsPage() {
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
                               </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>

@@ -59,6 +59,8 @@ interface ContactTableProps {
   onRefresh: () => void
   onView: (query: ContactQuery) => void
   onReply: (query: ContactQuery) => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 const statusConfig: Record<ContactStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
@@ -75,7 +77,7 @@ const priorityConfig: Record<ContactPriority, { label: string; className: string
   URGENT: { label: "Urgent", className: "bg-red-100 text-red-800" }
 }
 
-export default function ContactTable({ queries, onRefresh, onView, onReply }: ContactTableProps) {
+export default function ContactTable({ queries, onRefresh, onView, onReply, canUpdate = true, canDelete = true }: ContactTableProps) {
   const [selectedQuery, setSelectedQuery] = useState<ContactQuery | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -189,31 +191,37 @@ export default function ContactTable({ queries, onRefresh, onView, onReply }: Co
                             Reply
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>
-                              <Clock className="mr-2 h-4 w-4" />
-                              Change Status
-                            </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent>
-                              {(Object.keys(statusLabels) as ContactStatus[]).map((status) => (
-                                <DropdownMenuItem 
-                                  key={status}
-                                  onClick={() => handleStatusChange(query, status)}
-                                  disabled={query.status === status}
-                                >
-                                  {statusLabels[status]}
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuSubContent>
-                          </DropdownMenuSub>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(query)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
+                          {canUpdate && (
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>
+                                <Clock className="mr-2 h-4 w-4" />
+                                Change Status
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent>
+                                {(Object.keys(statusLabels) as ContactStatus[]).map((status) => (
+                                  <DropdownMenuItem 
+                                    key={status}
+                                    onClick={() => handleStatusChange(query, status)}
+                                    disabled={query.status === status}
+                                  >
+                                    {statusLabels[status]}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                          )}
+                          {canDelete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => handleDelete(query)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

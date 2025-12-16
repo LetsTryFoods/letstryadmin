@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ColumnSelector, ColumnDefinition } from "../components/column-selector"
 import { ImagePreviewDialog } from "../components/image-preview-dialog"
 import { useCategoryPage } from "@/hooks/useCategoryPage"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { CategoryForm } from "./components/CategoryForm"
 import { CategoryTable } from "./components/CategoryTable"
 import { ArchiveDialog } from "./components/ArchiveDialog"
@@ -28,6 +29,7 @@ const allColumns: ColumnDefinition[] = [
 
 export default function CategoriesPage() {
   const { state, actions } = useCategoryPage()
+  const { canCreate, canUpdate, canDelete } = usePermissionActions("categories")
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -47,6 +49,7 @@ export default function CategoriesPage() {
               Show Archived
             </label>
           </div>
+          {canCreate && (
           <Dialog open={state.isDialogOpen} onOpenChange={actions.setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={actions.handleAddCategory}>Add Category</Button>
@@ -63,6 +66,7 @@ export default function CategoriesPage() {
               />
             </DialogContent>
           </Dialog>
+          )}
         </div>
       </div>
 
@@ -86,6 +90,8 @@ export default function CategoriesPage() {
             onFavouriteToggle={actions.handleFavouriteToggle}
             onEdit={actions.handleEdit}
             onImagePreview={actions.handleImagePreview}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
           />
         </div>
       </div>
