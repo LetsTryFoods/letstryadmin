@@ -79,7 +79,7 @@ export default function FAQTable({ faqs, onRefresh, onEdit, canUpdate = true, ca
   const confirmStatusToggle = async () => {
     if (selectedFAQ) {
       const newStatus = selectedFAQ.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-      await updateFAQ(selectedFAQ._id, { status: newStatus })
+      await updateFAQ({ id: selectedFAQ._id, status: newStatus })
       onRefresh()
     }
     setShowStatusDialog(false)
