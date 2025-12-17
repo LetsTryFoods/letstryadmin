@@ -13,16 +13,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useState } from 'react'
+import { handleLogout } from '@/lib/auth/logout'
 
 export function AppNavbar() {
   const [searchQuery, setSearchQuery] = useState('')
-
-  const handleLogout = () => {
-    // Clear authentication
-    localStorage.removeItem('token')
-    document.cookie = 'token=; path=/; max-age=0'
-    window.location.href = '/auth/login'
-  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

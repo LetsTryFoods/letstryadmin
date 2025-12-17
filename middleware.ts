@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getValidTokenServer } from '@/lib/auth/token-service-server'
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value
@@ -10,11 +11,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  if (!token && !isAuthPage) {
+  const validToken = getValidTokenServer(token)
+
+  if (!validToken && !isAuthPage) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
-  if (token && isAuthPage) {
+  if (validToken && isAuthPage) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 

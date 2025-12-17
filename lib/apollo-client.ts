@@ -1,34 +1,43 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
+import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
+import { ErrorLink } from '@apollo/client/link/error'
+import { CombinedGraphQLErrors } from '@apollo/client/errors'
+import { getValidToken, redirectToLogin } from '@/lib/auth/token-service'
 
 const httpLink = createHttpLink({
   uri: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/graphql',
   credentials: 'include',
 })
 
-console.log('🚀 Apollo Client URI:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/graphql')
-
 const authLink = setContext((_, { headers }) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-
-  console.log('🔐 Apollo Client Auth Token:', token ? `Bearer ${token.substring(0, 20)}...` : 'None')
-
-  const authHeaders = {
-    ...(headers || {}),
-    authorization: token ? `Bearer ${token}` : '',
-  }
-
-  console.log('📤 Headers being sent:', {
-    authorization: authHeaders.authorization ? 'Present' : 'None',
-    otherHeaders: headers ? Object.keys(headers).length : 0
-  })
+  const token = getValidToken()
 
   return {
-    headers: authHeaders,
+    headers: {
+      ...(headers || {}),
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  }
+})
+
+const errorLink = new ErrorLink(({ error }) => {
+  if (CombinedGraphQLErrors.is(error)) {
+    for (const err of error.errors) {
+      if (err.extensions?.code === 'UNAUTHENTICATED' || 
+          err.message.includes('Unauthorized') ||
+          err.message.includes('Invalid token')) {
+        redirectToLogin()
+        return
+      }
+    }
+  } else if (error.message) {
+    if (error.message.includes('401') || error.message.includes('403')) {
+      redirectToLogin()
+    }
   }
 })
 
 export const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
 })

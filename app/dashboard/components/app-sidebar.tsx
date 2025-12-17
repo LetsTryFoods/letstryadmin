@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { handleLogout } from "@/lib/auth/logout"
 
 const items = [
   {
@@ -53,11 +54,6 @@ const items = [
     title: "Address",
     url: "/dashboard/address",
     icon: Truck,
-  },
-  {
-    title: "Footer Details",
-    url: "/dashboard/footer-detail",
-    icon: Settings,
   },
   {
     title: "SEO Content",
@@ -95,26 +91,6 @@ const items = [
     icon: ShoppingBag,
   },
   {
-    title: "Reviews",
-    url: "/dashboard/reviews",
-    icon: Star,
-  },
-  {
-    title: "Notifications",
-    url: "/dashboard/notifications",
-    icon: Bell,
-  },
-  {
-    title: "Reports",
-    url: "/dashboard/reports",
-    icon: BarChart3,
-  },
-  {
-    title: "FAQ",
-    url: "/dashboard/faq",
-    icon: HelpCircle,
-  },
-  {
     title: "Contact Queries",
     url: "/dashboard/contact",
     icon: MessageSquare,
@@ -129,12 +105,6 @@ export function AppSidebar() {
   
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [policyToDelete, setPolicyToDelete] = useState<any>(null)
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-    router.push('/auth/login')
-  }
 
   const handleDeleteClick = (policy: any) => {
     setPolicyToDelete(policy)
