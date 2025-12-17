@@ -82,6 +82,14 @@ export function FooterTable({
                     ) : (
                       footer.isActive ? "Yes" : "No"
                     )
+                  ) : columnKey === 'backgroundColor' ? (
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="h-6 w-6 rounded border"
+                        style={{ backgroundColor: footer.backgroundColor || '#1e293b' }}
+                      />
+                      <span className="text-xs text-muted-foreground">{footer.backgroundColor || '#1e293b'}</span>
+                    </div>
                   ) : columnKey === 'logoUrl' ? (
                     footer.logoUrl ? (
                       <img src={footer.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
@@ -118,6 +126,14 @@ export function FooterTable({
                         ))}
                       </div>
                     ) : '-'
+                  ) : columnKey === 'quickLinks' ? (
+                    footer.quickLinks?.length > 0 ? (
+                      <span className="text-sm">{footer.quickLinks.length} links</span>
+                    ) : '-'
+                  ) : columnKey === 'copyrightText' ? (
+                    <div className="max-w-[200px] truncate" title={footer.copyrightText}>
+                      {footer.copyrightText || '-'}
+                    </div>
                   ) : (
                     String(footer[columnKey as keyof typeof footer] || '-')
                   )}

@@ -13,6 +13,7 @@ import { DeleteFooterDialog } from "./components/DeleteFooterDialog"
 
 // Define all columns
 const allColumns: ColumnDefinition[] = [
+    { key: "backgroundColor", label: "Background Color" },
     { key: "logoUrl", label: "Logo" },
     { key: "companyName", label: "Company Name" },
     { key: "cin", label: "CIN" },
@@ -22,6 +23,9 @@ const allColumns: ColumnDefinition[] = [
     { key: "exportEmail", label: "Export Email" },
     { key: "socialMediaTitle", label: "Social Title" },
     { key: "socialMediaLinks", label: "Social Links" },
+    { key: "quickLinksTitle", label: "Quick Links Title" },
+    { key: "quickLinks", label: "Quick Links" },
+    { key: "copyrightText", label: "Copyright" },
     { key: "isActive", label: "Active" },
 ]
 

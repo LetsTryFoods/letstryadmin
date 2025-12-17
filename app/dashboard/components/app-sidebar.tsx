@@ -11,11 +11,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LogOut, Image, FolderTree, Tag, DollarSign, ShoppingBag, ShoppingCart, Users, Star, Bell, BarChart3, HelpCircle, MessageSquare, Shield } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { LogOut, Image, FolderTree, Tag, DollarSign, ShoppingBag, ShoppingCart, Users, Star, Bell, BarChart3, HelpCircle, MessageSquare, Shield, LucideIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Package, Settings, LayoutDashboard, Truck, RefreshCcw, FileText, Trash2, Search, } from "lucide-react"
 import { usePolicies, useDeletePolicy } from "@/lib/policies/usePolicies"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { toast } from "react-hot-toast"
 import {
   AlertDialog,
@@ -27,130 +28,39 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useAdminMe, AdminPermission } from "@/lib/rbac/useRbac"
+import { useAdminMe, useSortedPermissions, AdminPermission } from "@/lib/rbac/useRbac"
 
-const items = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-    slug: "dashboard",
-  },
-  {
-    title: "Products",
-    url: "/dashboard/products",
-    icon: Package,
-    slug: "products",
-  },
-  {
-    title: "Banners",
-    url: "/dashboard/banners",
-    icon: Image,
-    slug: "banners",
-  },
-  {
-    title: "Categories",
-    url: "/dashboard/categories",
-    icon: FolderTree,
-    slug: "categories",
-  },
-  {
-    title: "Address",
-    url: "/dashboard/address",
-    icon: Truck,
-    slug: "address",
-  },
-  {
-    title: "Footer Details",
-    url: "/dashboard/footer-detail",
-    icon: Settings,
-    slug: "footer-detail",
-  },
-  {
-    title: "SEO Content",
-    url: "/dashboard/seo-content",
-    icon: RefreshCcw,
-    slug: "seo-content",
-  },
-  {
-    title: "Product SEO",
-    url: "/dashboard/sco-product",
-    icon: Search,
-    slug: "sco-product",
-  },
-  {
-    title: "Coupons",
-    url: "/dashboard/coupons",
-    icon: Tag,
-    slug: "coupons",
-  },
-  {
-    title: "Charges",
-    url: "/dashboard/charges",
-    icon: DollarSign,
-    slug: "charges",
-  },
-  {
-    title: "Customers",
-    url: "/dashboard/customers",
-    icon: Users,
-    slug: "customers",
-  },
-  {
-    title: "Abandoned Carts",
-    url: "/dashboard/cards",
-    icon: ShoppingCart,
-    slug: "cards",
-  },
-  {
-    title: "Orders",
-    url: "/dashboard/orders",
-    icon: ShoppingBag,
-    slug: "orders",
-  },
-  {
-    title: "Reviews",
-    url: "/dashboard/reviews",
-    icon: Star,
-    slug: "reviews",
-  },
-  {
-    title: "Notifications",
-    url: "/dashboard/notifications",
-    icon: Bell,
-    slug: "notifications",
-  },
-  {
-    title: "Reports",
-    url: "/dashboard/reports",
-    icon: BarChart3,
-    slug: "reports",
-  },
-  {
-    title: "FAQ",
-    url: "/dashboard/faq",
-    icon: HelpCircle,
-    slug: "faq",
-  },
-  {
-    title: "Contact Queries",
-    url: "/dashboard/contact",
-    icon: MessageSquare,
-    slug: "contact",
-  },
-  {
-    title: "User Management",
-    url: "/dashboard/user-management",
-    icon: Shield,
-    slug: "rbac",
-  }
-]
+// Map of slug to icon and URL - used as reference data (icons & URLs are frontend only)
+const menuItemsMap: Record<string, { icon: LucideIcon; url: string }> = {
+  "dashboard": { icon: LayoutDashboard, url: "/dashboard" },
+  "products": { icon: Package, url: "/dashboard/products" },
+  "banners": { icon: Image, url: "/dashboard/banners" },
+  "categories": { icon: FolderTree, url: "/dashboard/categories" },
+  "address": { icon: Truck, url: "/dashboard/address" },
+  "footer-detail": { icon: Settings, url: "/dashboard/footer-detail" },
+  "seo-content": { icon: RefreshCcw, url: "/dashboard/seo-content" },
+  "sco-product": { icon: Search, url: "/dashboard/sco-product" },
+  "coupons": { icon: Tag, url: "/dashboard/coupons" },
+  "charges": { icon: DollarSign, url: "/dashboard/charges" },
+  "customers": { icon: Users, url: "/dashboard/customers" },
+  "cards": { icon: ShoppingCart, url: "/dashboard/cards" },
+  "orders": { icon: ShoppingBag, url: "/dashboard/orders" },
+  "reviews": { icon: Star, url: "/dashboard/reviews" },
+  "notifications": { icon: Bell, url: "/dashboard/notifications" },
+  "reports": { icon: BarChart3, url: "/dashboard/reports" },
+  "faq": { icon: HelpCircle, url: "/dashboard/faq" },
+  "contact": { icon: MessageSquare, url: "/dashboard/contact" },
+  "policies": { icon: FileText, url: "/dashboard/policies" },
+  "rbac": { icon: Shield, url: "/dashboard/user-management" },
+}
 
 export function AppSidebar() {
   const router = useRouter()
   const { data: policiesData } = usePolicies()
   const { mutate: deletePolicy } = useDeletePolicy()
   const { data: adminMeData, loading: adminMeLoading } = useAdminMe()
+  // Fetch sorted permissions from backend (for super-admin to get correct order)
+  const { data: sortedPermissionsData, loading: permissionsLoading } = useSortedPermissions()
   const policies = (policiesData as any)?.policies || []
   
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -159,21 +69,49 @@ export function AppSidebar() {
   // Get user permissions from adminMe
   const userPermissions: AdminPermission[] = adminMeData?.adminMe?.permissions || []
   const isSuperAdmin = adminMeData?.adminMe?.roleSlug === "super-admin"
+  
+  // Get all sorted permissions from backend (for super-admin)
+  const allSortedPermissions = sortedPermissionsData?.sortedPermissions || []
 
-  // Filter menu items based on user permissions
-  const filteredItems = useMemo(() => {
-    // If no permissions loaded yet or super admin, show all items
-    if (adminMeLoading || isSuperAdmin || userPermissions.length === 0) {
-      return items
+  // Combined loading state
+  const isLoading = adminMeLoading || (isSuperAdmin && permissionsLoading)
+
+  // Build menu items based on permissions (sorted by sortOrder from backend)
+  const menuItems = useMemo(() => {
+    // Still loading - return empty to show skeleton
+    if (isLoading) {
+      return []
     }
 
-    // Filter items based on user's permissions
-    return items.filter((item) => {
-      const permission = userPermissions.find((p) => p.slug === item.slug)
-      // Show if user has any action (view, create, update, delete, manage) for this permission
-      return permission && permission.actions.length > 0
-    })
-  }, [userPermissions, isSuperAdmin, adminMeLoading])
+    // Super admin - show all items from backend sorted by sortOrder
+    if (isSuperAdmin && allSortedPermissions.length > 0) {
+      return allSortedPermissions
+        .filter((p) => menuItemsMap[p.slug]) // Only show items we have icons for
+        .map((permission) => {
+          const itemData = menuItemsMap[permission.slug]
+          return {
+            slug: permission.slug,
+            title: permission.name, // Title from backend
+            url: itemData.url,
+            icon: itemData.icon,
+          }
+        })
+    }
+
+    // Regular user - show only permitted items, sorted by sortOrder from permissions
+    return userPermissions
+      .filter((p) => p.actions.length > 0 && menuItemsMap[p.slug])
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      .map((permission) => {
+        const itemData = menuItemsMap[permission.slug]
+        return {
+          slug: permission.slug,
+          title: permission.name, // Title from backend
+          url: itemData.url,
+          icon: itemData.icon,
+        }
+      })
+  }, [userPermissions, isSuperAdmin, isLoading, allSortedPermissions])
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -210,16 +148,30 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {filteredItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {/* Show skeleton loading state while permissions are loading */}
+              {isLoading ? (
+                // Skeleton loading placeholders
+                Array.from({ length: 8 }).map((_, index) => (
+                  <SidebarMenuItem key={`skeleton-${index}`}>
+                    <div className="flex items-center gap-2 px-2 py-2">
+                      <Skeleton className="h-4 w-4 rounded" />
+                      <Skeleton className="h-4 w-24 rounded" />
+                    </div>
+                  </SidebarMenuItem>
+                ))
+              ) : (
+                // Render actual menu items (sorted by sortOrder from backend)
+                menuItems.map((item: any) => (
+                  <SidebarMenuItem key={item.slug}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

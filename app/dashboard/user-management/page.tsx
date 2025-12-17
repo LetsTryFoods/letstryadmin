@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsersTab } from "./components/UsersTab";
 import { RolesTab } from "./components/RolesTab";
 import { PermissionsTab } from "./components/PermissionsTab";
-import { Users, Shield, Key } from "lucide-react";
+import { SidebarOrderTab } from "./components/SidebarOrderTab";
+import { Users, Shield, Key, LayoutList } from "lucide-react";
 
 export default function UserManagementPage() {
   const [activeTab, setActiveTab] = useState("users");
@@ -20,7 +21,7 @@ export default function UserManagementPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+        <TabsList className="grid w-full grid-cols-4 lg:w-[500px]">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Users</span>
@@ -32,6 +33,10 @@ export default function UserManagementPage() {
           <TabsTrigger value="permissions" className="flex items-center gap-2">
             <Key className="h-4 w-4" />
             <span className="hidden sm:inline">Permissions</span>
+          </TabsTrigger>
+          <TabsTrigger value="sidebar" className="flex items-center gap-2">
+            <LayoutList className="h-4 w-4" />
+            <span className="hidden sm:inline">Sidebar</span>
           </TabsTrigger>
         </TabsList>
 
@@ -45,6 +50,10 @@ export default function UserManagementPage() {
 
         <TabsContent value="permissions">
           <PermissionsTab />
+        </TabsContent>
+
+        <TabsContent value="sidebar">
+          <SidebarOrderTab />
         </TabsContent>
       </Tabs>
     </div>

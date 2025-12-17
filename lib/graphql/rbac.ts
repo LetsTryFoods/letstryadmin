@@ -188,6 +188,7 @@ export const GET_ADMIN_ME = gql`
         slug
         name
         module
+        sortOrder
         actions
       }
       isActive
@@ -235,6 +236,26 @@ export const TOGGLE_PERMISSION_ACTIVE = gql`
   mutation TogglePermissionActive($id: String!) {
     togglePermissionActive(id: $id) {
       _id
+      isActive
+    }
+  }
+`;
+
+export const REORDER_PERMISSIONS = gql`
+  mutation ReorderPermissions($orderedIds: [String!]!) {
+    reorderPermissions(orderedIds: $orderedIds)
+  }
+`;
+
+export const GET_SORTED_PERMISSIONS = gql`
+  query GetSortedPermissions {
+    sortedPermissions {
+      _id
+      slug
+      name
+      description
+      module
+      sortOrder
       isActive
     }
   }

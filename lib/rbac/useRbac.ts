@@ -3,6 +3,7 @@ import {
   GET_PERMISSIONS,
   GET_ACTIVE_PERMISSIONS,
   GET_PERMISSION_MODULES,
+  GET_SORTED_PERMISSIONS,
   GET_ADMIN_ROLES,
   GET_ACTIVE_ADMIN_ROLES,
   GET_ADMIN_ROLE,
@@ -13,6 +14,7 @@ import {
   UPDATE_PERMISSION,
   DELETE_PERMISSION,
   TOGGLE_PERMISSION_ACTIVE,
+  REORDER_PERMISSIONS,
   CREATE_ADMIN_ROLE,
   UPDATE_ADMIN_ROLE,
   DELETE_ADMIN_ROLE,
@@ -74,6 +76,7 @@ export interface AdminPermission {
   slug: string;
   name: string;
   module: string;
+  sortOrder: number;
   actions: string[];
 }
 
@@ -186,13 +189,29 @@ export function useUpdatePermission() {
 
 export function useDeletePermission() {
   return useMutation(DELETE_PERMISSION, {
-    refetchQueries: ["GetPermissions", "GetActivePermissions"],
+    refetchQueries: ["GetPermissions", "GetActivePermissions", "GetSortedPermissions"],
   });
 }
 
 export function useTogglePermissionActive() {
   return useMutation(TOGGLE_PERMISSION_ACTIVE, {
-    refetchQueries: ["GetPermissions", "GetActivePermissions"],
+    refetchQueries: ["GetPermissions", "GetActivePermissions", "GetSortedPermissions"],
+  });
+}
+
+export function useReorderPermissions() {
+  return useMutation(REORDER_PERMISSIONS, {
+    refetchQueries: ["GetPermissions", "GetActivePermissions", "GetSortedPermissions", "GetAdminMe"],
+  });
+}
+
+export interface SortedPermissionsResponse {
+  sortedPermissions: Permission[];
+}
+
+export function useSortedPermissions() {
+  return useQuery<SortedPermissionsResponse>(GET_SORTED_PERMISSIONS, {
+    fetchPolicy: "cache-and-network",
   });
 }
 

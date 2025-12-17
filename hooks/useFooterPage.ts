@@ -4,7 +4,7 @@ import { useFooterDetails, useCreateFooterDetail, useUpdateFooterDetail, useDele
 export function useFooterPage() {
   // UI State
   const [selectedColumns, setSelectedColumns] = useState([
-    "logoUrl", "companyName", "email", "phone", "socialMediaLinks", "isActive"
+    "backgroundColor", "logoUrl", "companyName", "email", "phone", "quickLinks", "socialMediaLinks", "isActive"
   ])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingFooter, setEditingFooter] = useState<any | null>(null)
