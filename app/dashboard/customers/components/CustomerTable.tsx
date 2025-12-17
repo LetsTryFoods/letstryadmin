@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { format } from "date-fns"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -9,9 +10,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/table";
+
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +20,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,99 +30,61 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { 
-  Eye, 
-  MoreHorizontal, 
-  Ban, 
-  CheckCircle, 
-  XCircle, 
+} from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Eye,
+  MoreHorizontal,
   Trash2,
   Phone,
   Mail,
-  MapPin
-} from "lucide-react"
-import { 
-  Customer, 
-  CustomerStatus, 
-  useUpdateCustomerStatus, 
-  useDeleteCustomer 
-} from "@/lib/customers/useCustomers"
-import CustomerDetailsDialog from "./CustomerDetailsDialog"
+  ShoppingCart,
+} from "lucide-react";
+import { Customer, useDeleteCustomer } from "@/lib/customers/useCustomers";
+import CustomerDetailsDialog from "./CustomerDetailsDialog";
+import { getInitials, formatCurrency } from "../utils/customerUtils";
 
 interface CustomerTableProps {
-  customers: Customer[]
-  onRefresh: () => void
+  customers: Customer[];
+  onRefresh: () => void;
 }
 
-const statusConfig: Record<CustomerStatus, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-  ACTIVE: { label: "Active", variant: "default" },
-  INACTIVE: { label: "Inactive", variant: "secondary" },
-  BLOCKED: { label: "Blocked", variant: "destructive" }
-}
+export default function CustomerTable({
+  customers,
+  onRefresh,
+}: CustomerTableProps) {
+  const router = useRouter();
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-export default function CustomerTable({ customers, onRefresh }: CustomerTableProps) {
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showStatusDialog, setShowStatusDialog] = useState(false)
-  const [newStatus, setNewStatus] = useState<CustomerStatus | null>(null)
+  const { deleteCustomer } = useDeleteCustomer();
 
-  const { updateStatus } = useUpdateCustomerStatus()
-  const { deleteCustomer } = useDeleteCustomer()
+  const handleRowClick = (customerId: string) => {
+    router.push(`/dashboard/customers/${customerId}`);
+  };
 
   const handleViewDetails = (customer: Customer) => {
-    setSelectedCustomer(customer)
-    setShowDetailsDialog(true)
-  }
-
-  const handleStatusChange = (customer: Customer, status: CustomerStatus) => {
-    setSelectedCustomer(customer)
-    setNewStatus(status)
-    setShowStatusDialog(true)
-  }
+    setSelectedCustomer(customer);
+    setShowDetailsDialog(true);
+  };
 
   const handleDeleteCustomer = (customer: Customer) => {
-    setSelectedCustomer(customer)
-    setShowDeleteDialog(true)
-  }
-
-  const confirmStatusChange = async () => {
-    if (selectedCustomer && newStatus) {
-      await updateStatus(selectedCustomer._id, newStatus)
-      onRefresh()
-    }
-    setShowStatusDialog(false)
-    setSelectedCustomer(null)
-    setNewStatus(null)
-  }
+    setSelectedCustomer(customer);
+    setShowDeleteDialog(true);
+  };
 
   const confirmDelete = async () => {
     if (selectedCustomer) {
-      await deleteCustomer(selectedCustomer._id)
-      onRefresh()
+      await deleteCustomer(selectedCustomer._id);
+      onRefresh();
     }
-    setShowDeleteDialog(false)
-    setSelectedCustomer(null)
-  }
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
+    setShowDeleteDialog(false);
+    setSelectedCustomer(null);
+  };
 
   return (
     <>
@@ -133,7 +96,7 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
               <TableHead>Contact</TableHead>
               <TableHead className="text-center">Orders</TableHead>
               <TableHead className="text-right">Total Spent</TableHead>
-              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="text-center">Active Cart</TableHead>
               <TableHead>Joined</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -141,30 +104,41 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
           <TableBody>
             {customers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={7}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No customers found
                 </TableCell>
               </TableRow>
             ) : (
               customers.map((customer) => {
-                const status = statusConfig[customer.status]
                 return (
-                  <TableRow key={customer._id}>
+                  <TableRow
+                    key={customer._id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleRowClick(customer._id)}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
                           {customer.avatar ? (
                             <img src={customer.avatar} alt={customer.name} />
                           ) : (
-                            <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+                            <AvatarFallback>
+                              {getInitials(customer.name)}
+                            </AvatarFallback>
                           )}
                         </Avatar>
                         <div>
-                          <p className="font-medium">{customer.name}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {customer.addresses[0]?.city || 'No address'}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{customer.name}</p>
+                            {customer.isGuest && (
+                              <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
+                                Guest
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -181,19 +155,31 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className="font-medium">{customer.totalOrders}</span>
+                      <span className="font-medium">
+                        {customer.totalOrders}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(customer.totalSpent)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant={status.variant}>
-                        {status.label}
-                      </Badge>
+                      {customer.activeCartItemsCount &&
+                      customer.activeCartItemsCount > 0 ? (
+                        <div className="flex items-center justify-center gap-1">
+                          <ShoppingCart className="h-4 w-4 text-green-600" />
+                          <span className="font-medium">
+                            {customer.activeCartItemsCount}
+                          </span>
+                        </div>
+                      ) : (
+                        <Badge variant="destructive" className="text-xs">
+                          No Cart
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       <p className="text-sm">
-                        {format(new Date(customer.createdAt), 'dd MMM yyyy')}
+                        {format(new Date(customer.createdAt), "dd MMM yyyy")}
                       </p>
                     </TableCell>
                     <TableCell className="text-right">
@@ -205,32 +191,14 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handleViewDetails(customer)}>
+                          <DropdownMenuItem
+                            onClick={() => handleViewDetails(customer)}
+                          >
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                          {customer.status !== 'ACTIVE' && (
-                            <DropdownMenuItem onClick={() => handleStatusChange(customer, 'ACTIVE')}>
-                              <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-                              Mark Active
-                            </DropdownMenuItem>
-                          )}
-                          {customer.status !== 'INACTIVE' && (
-                            <DropdownMenuItem onClick={() => handleStatusChange(customer, 'INACTIVE')}>
-                              <XCircle className="mr-2 h-4 w-4 text-gray-600" />
-                              Mark Inactive
-                            </DropdownMenuItem>
-                          )}
-                          {customer.status !== 'BLOCKED' && (
-                            <DropdownMenuItem onClick={() => handleStatusChange(customer, 'BLOCKED')}>
-                              <Ban className="mr-2 h-4 w-4 text-red-600" />
-                              Block Customer
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleDeleteCustomer(customer)}
                             className="text-red-600"
                           >
@@ -241,7 +209,7 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })
             )}
           </TableBody>
@@ -254,34 +222,9 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
           customer={selectedCustomer}
           open={showDetailsDialog}
           onOpenChange={setShowDetailsDialog}
-          onStatusChange={handleStatusChange}
           onDelete={handleDeleteCustomer}
         />
       )}
-
-      {/* Status Change Confirmation Dialog */}
-      <AlertDialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Status Change</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to change the status of <strong>{selectedCustomer?.name}</strong> to{' '}
-              <strong>{newStatus ? statusConfig[newStatus].label : ''}</strong>?
-              {newStatus === 'BLOCKED' && (
-                <span className="block mt-2 text-red-600">
-                  This will prevent the customer from placing new orders.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStatusChange}>
-              Confirm
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -289,15 +232,17 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Customer Account</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the account of <strong>{selectedCustomer?.name}</strong>?
+              Are you sure you want to delete the account of{" "}
+              <strong>{selectedCustomer?.name}</strong>?
               <span className="block mt-2 text-red-600">
-                This action cannot be undone. All customer data including order history will be permanently removed.
+                This action cannot be undone. All customer data including order
+                history will be permanently removed.
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -307,5 +252,5 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

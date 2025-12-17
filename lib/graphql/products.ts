@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client";
 
 // Fragment for variant fields
 const VARIANT_FIELDS = `
@@ -24,7 +24,7 @@ const VARIANT_FIELDS = `
   thumbnailUrl
   isDefault
   isActive
-`
+`;
 
 // Fragment for SEO fields
 const SEO_FIELDS = `
@@ -39,7 +39,7 @@ const SEO_FIELDS = `
   ogImage
   createdAt
   updatedAt
-`
+`;
 
 export const GET_PRODUCTS = gql`
   query GetProducts($pagination: PaginationInput!, $includeOutOfStock: Boolean!) {
@@ -49,7 +49,7 @@ export const GET_PRODUCTS = gql`
         name
         slug
         description
-        categoryId
+        categoryIds
         brand
         gtin
         mpn
@@ -93,7 +93,7 @@ export const GET_PRODUCTS = gql`
       }
     }
   }
-`
+`;
 
 // Product query for SEO page - includes SEO field and minimal info needed
 export const GET_PRODUCTS_FOR_SEO = gql`
@@ -125,7 +125,7 @@ export const GET_PRODUCTS_FOR_SEO = gql`
       }
     }
   }
-`
+`;
 
 // Update product SEO via updateProduct mutation
 export const UPDATE_PRODUCT_SEO = gql`
@@ -138,7 +138,7 @@ export const UPDATE_PRODUCT_SEO = gql`
       }
     }
   }
-`
+`;
 
 export const GET_PRODUCT = gql`
   query GetProduct($id: ID!) {
@@ -147,7 +147,7 @@ export const GET_PRODUCT = gql`
       name
       slug
       description
-      categoryId
+      categoryIds
       brand
       gtin
       mpn
@@ -188,7 +188,7 @@ export const GET_PRODUCT = gql`
       }
     }
   }
-`
+`;
 
 export const GET_PRODUCT_BY_SLUG = gql`
   query GetProductBySlug($slug: String!) {
@@ -197,7 +197,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
       name
       slug
       description
-      categoryId
+      categoryIds
       brand
       gtin
       mpn
@@ -238,7 +238,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
       }
     }
   }
-`
+`;
 
 export const GET_PRODUCTS_BY_CATEGORY = gql`
   query GetProductsByCategory($categoryId: ID!, $pagination: PaginationInput!) {
@@ -248,7 +248,7 @@ export const GET_PRODUCTS_BY_CATEGORY = gql`
         name
         slug
         description
-        categoryId
+        categoryIds
         brand
         currency
         isArchived
@@ -273,7 +273,7 @@ export const GET_PRODUCTS_BY_CATEGORY = gql`
       }
     }
   }
-`
+`;
 
 export const SEARCH_PRODUCTS = gql`
   query SearchProducts($searchTerm: String!, $pagination: PaginationInput!) {
@@ -283,7 +283,7 @@ export const SEARCH_PRODUCTS = gql`
         name
         slug
         description
-        categoryId
+        categoryIds
         brand
         currency
         isArchived
@@ -308,7 +308,7 @@ export const SEARCH_PRODUCTS = gql`
       }
     }
   }
-`
+`;
 
 export const CREATE_PRODUCT = gql`
   mutation CreateProduct($input: CreateProductInput!) {
@@ -317,10 +317,10 @@ export const CREATE_PRODUCT = gql`
       name
       slug
       description
-      categoryId
+      categoryIds
     }
   }
-`
+`;
 
 export const UPDATE_PRODUCT = gql`
   mutation UpdateProduct($id: ID!, $input: UpdateProductInput!) {
@@ -328,7 +328,7 @@ export const UPDATE_PRODUCT = gql`
       _id
     }
   }
-`
+`;
 
 export const DELETE_PRODUCT = gql`
   mutation DeleteProduct($id: ID!) {
@@ -337,7 +337,7 @@ export const DELETE_PRODUCT = gql`
       name
     }
   }
-`
+`;
 
 export const ARCHIVE_PRODUCT = gql`
   mutation ArchiveProduct($id: ID!) {
@@ -347,7 +347,7 @@ export const ARCHIVE_PRODUCT = gql`
       isArchived
     }
   }
-`
+`;
 
 export const UNARCHIVE_PRODUCT = gql`
   mutation UnarchiveProduct($id: ID!) {
@@ -357,7 +357,7 @@ export const UNARCHIVE_PRODUCT = gql`
       isArchived
     }
   }
-`
+`;
 
 export const UPDATE_PRODUCT_STOCK = gql`
   mutation UpdateProductStock($id: ID!, $quantity: Int!) {
@@ -368,4 +368,4 @@ export const UPDATE_PRODUCT_STOCK = gql`
       availabilityStatus
     }
   }
-`
+`;

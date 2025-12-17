@@ -1,73 +1,80 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { 
-  Users, 
-  UserCheck, 
-  UserX, 
-  Ban, 
-  Search, 
+  Users,
+  UserCheck,
+  Search,
   IndianRupee,
-  TrendingUp,
-  UserPlus
-} from "lucide-react"
-import { 
-  useCustomers, 
-  CustomerStatus, 
-  getCustomerStats 
-} from "@/lib/customers/useCustomers"
-import CustomerTable from "./components/CustomerTable"
+  UserPlus,
+  Filter,
+} from "lucide-react";
+import { useCustomers } from "@/lib/customers/useCustomers";
+import CustomerTable from "./components/CustomerTable";
+import CustomerFilters from "./components/CustomerFilters";
+import StatCard from "./components/StatCard";
+import { formatCurrency } from "./utils/customerUtils";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+
+interface FilterValues {
+  sortBy: string;
+  sortOrder: string;
+  startDate: string;
+  endDate: string;
+  minSpent: string;
+  maxSpent: string;
+}
 
 export default function CustomersPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<CustomerStatus | "ALL">("ALL")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<FilterValues>({
+    sortBy: "",
+    sortOrder: "",
+    startDate: "",
+    endDate: "",
+    minSpent: "",
+    maxSpent: "",
+  });
 
-  const { data, refetch } = useCustomers()
-  const customers = data?.customers || []
+  const { data, refetch } = useCustomers({
+    searchTerm: searchQuery,
+    sortBy: (filters.sortBy || undefined) as any,
+    sortOrder: (filters.sortOrder || undefined) as any,
+    startDate: filters.startDate || undefined,
+    endDate: filters.endDate || undefined,
+    minSpent: filters.minSpent ? parseFloat(filters.minSpent) : undefined,
+    maxSpent: filters.maxSpent ? parseFloat(filters.maxSpent) : undefined,
+  });
 
-  // Get overall stats
-  const stats = useMemo(() => getCustomerStats(customers), [customers])
+  const customers = data?.customers || [];
+  const summary = data?.summary;
+  const meta = data?.meta;
 
-  // Filter customers based on search and status
-  const filteredCustomers = useMemo(() => {
-    return customers.filter((customer) => {
-      // Search filter
-      const matchesSearch = 
-        searchQuery === "" ||
-        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.phone.includes(searchQuery)
+  const handleFilterChange = (values: FilterValues) => {
+    setFilters(values);
+  };
 
-      // Status filter
-      const matchesStatus = 
-        statusFilter === "ALL" || 
-        customer.status === statusFilter
+  const handleClearFilters = () => {
+    setFilters({
+      sortBy: "",
+      sortOrder: "",
+      startDate: "",
+      endDate: "",
+      minSpent: "",
+      maxSpent: "",
+    });
+  };
 
-      return matchesSearch && matchesStatus
-    })
-  }, [customers, searchQuery, statusFilter])
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
+  const handleClearSearch = () => {
+    setSearchQuery("");
+  };
 
   return (
     <div className="space-y-6 mx-6 auto mb-12">
-      {/* Header */} 
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
         <p className="text-muted-foreground">
@@ -75,106 +82,47 @@ export default function CustomersPage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+{stats.newThisMonth}</span> this month
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Registered Users"
+          value={summary?.totalRegistered || 0}
+          description={
+            <>
+              <span className="text-green-600">
+                +{summary?.newThisMonth || 0}
+              </span>{" "}
+              this month
+            </>
+          }
+          icon={Users}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
-            <UserCheck className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">
-              {Math.round((stats.active / stats.total) * 100)}% of total
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Guest Users"
+          value={summary?.totalGuests || 0}
+          description={`${summary?.statusStats.guest || 0} active guests`}
+          icon={UserCheck}
+          iconClassName="h-4 w-4 text-green-600"
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <IndianRupee className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground">
-              From {stats.totalOrders} orders
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Revenue"
+          value={formatCurrency(summary?.totalRevenue || 0)}
+          description={`From all customer orders`}
+          icon={IndianRupee}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.avgOrderValue)}</div>
-            <p className="text-xs text-muted-foreground">
-              Per customer order
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="New This Month"
+          value={summary?.newThisMonth || 0}
+          description="Customer signups"
+          icon={UserPlus}
+          iconClassName="h-4 w-4 text-blue-500"
+        />
       </div>
 
-      {/* Secondary Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inactive Customers</CardTitle>
-            <UserX className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.inactive}</div>
-            <p className="text-xs text-muted-foreground">
-              Haven&apos;t ordered recently
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Blocked Accounts</CardTitle>
-            <Ban className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.blocked}</div>
-            <p className="text-xs text-muted-foreground">
-              Restricted from ordering
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New This Month</CardTitle>
-            <UserPlus className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.newThisMonth}</div>
-            <p className="text-xs text-muted-foreground">
-              Customer signups
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -185,45 +133,36 @@ export default function CustomersPage() {
                 className="pl-10"
               />
             </div>
-            <Select 
-              value={statusFilter} 
-              onValueChange={(value) => setStatusFilter(value as CustomerStatus | "ALL")}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="INACTIVE">Inactive</SelectItem>
-                <SelectItem value="BLOCKED">Blocked</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button 
+            <Button variant="outline" onClick={handleClearSearch}>
+              Clear Search
+            </Button>
+            <Button
               variant="outline"
-              onClick={() => {
-                setSearchQuery("")
-                setStatusFilter("ALL")
-              }}
+              onClick={() => setShowFilters(!showFilters)}
             >
-              Clear Filters
+              <Filter className="mr-2 h-4 w-4" />
+              {showFilters ? "Hide" : "Show"} Filters
             </Button>
           </div>
+
+          <Collapsible open={showFilters}>
+            <CollapsibleContent>
+              <CustomerFilters
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+              />
+            </CollapsibleContent>
+          </Collapsible>
         </CardContent>
       </Card>
 
-      {/* Results count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredCustomers.length} of {customers.length} customers
+          Showing {customers.length} of {meta?.totalCount || 0} customers
         </p>
       </div>
 
-      {/* Customer Table */}
-      <CustomerTable 
-        customers={filteredCustomers} 
-        onRefresh={refetch}
-      />
+      <CustomerTable customers={customers} onRefresh={refetch} />
     </div>
-  )
+  );
 }

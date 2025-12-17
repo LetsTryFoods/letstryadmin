@@ -55,7 +55,7 @@ export interface Product {
   name: string;
   slug: string;
   description: string;
-  categoryId: string;
+  categoryIds: string[];
   brand: string;
   gtin?: string;
   mpn?: string;
@@ -101,4 +101,3 @@ export interface ProductColumn {
   key: string;
   label: string;
 }
-
