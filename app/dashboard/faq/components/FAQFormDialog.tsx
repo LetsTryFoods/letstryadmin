@@ -99,7 +99,7 @@ export default function FAQFormDialog({
   const onSubmit = async (data: FAQFormData) => {
     try {
       if (isEditing) {
-        await updateFAQ(faq._id, data)
+        await updateFAQ({ id: faq._id, ...data })
       } else {
         await createFAQ(data)
       }
