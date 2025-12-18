@@ -5,7 +5,7 @@ import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import { getValidToken, redirectToLogin } from '@/lib/auth/token-service'
 
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/graphql',
+  uri: process.env.NEXT_PUBLIC_API_URL  || 'http://localhost:5000/graphql',
   credentials: 'include',
 })
 
