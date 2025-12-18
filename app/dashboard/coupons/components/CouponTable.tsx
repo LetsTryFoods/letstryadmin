@@ -23,9 +23,10 @@ import { format } from "date-fns"
 interface CouponTableProps {
   coupons: Coupon[]
   onDelete: (coupon: Coupon) => void
+  canDelete?: boolean
 }
 
-export function CouponTable({ coupons, onDelete }: CouponTableProps) {
+export function CouponTable({ coupons, onDelete, canDelete = true }: CouponTableProps) {
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code)
   }
@@ -161,6 +162,7 @@ export function CouponTable({ coupons, onDelete }: CouponTableProps) {
               </TableCell> */}
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
+                  {canDelete && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -176,6 +178,7 @@ export function CouponTable({ coupons, onDelete }: CouponTableProps) {
                       <TooltipContent>Delete coupon</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

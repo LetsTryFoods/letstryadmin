@@ -33,9 +33,10 @@ interface OrderTableProps {
   orders: Order[]
   onViewDetails: (order: Order) => void
   onUpdateStatus: (orderId: string, status: OrderStatus) => void
+  canUpdate?: boolean
 }
 
-export function OrderTable({ orders, onViewDetails, onUpdateStatus }: OrderTableProps) {
+export function OrderTable({ orders, onViewDetails, onUpdateStatus, canUpdate = true }: OrderTableProps) {
   const getOrderStatusBadge = (status: OrderStatus) => {
     switch (status) {
       case 'PENDING':
@@ -184,7 +185,7 @@ export function OrderTable({ orders, onViewDetails, onUpdateStatus }: OrderTable
                     </Tooltip>
                   </TooltipProvider>
 
-                  {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && (
+                  {canUpdate && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -234,7 +235,7 @@ export function OrderTable({ orders, onViewDetails, onUpdateStatus }: OrderTable
                     </DropdownMenu>
                   )}
 
-                  {order.status === 'DELIVERED' && (
+                  {canUpdate && order.status === 'DELIVERED' && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">

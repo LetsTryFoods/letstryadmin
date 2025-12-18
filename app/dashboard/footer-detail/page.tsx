@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
 import { useFooterPage } from "@/hooks/useFooterPage"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { ColumnSelector, ColumnDefinition } from "@/app/dashboard/components/column-selector"
 import { FooterForm } from "./components/FooterForm"
 import { FooterTable } from "./components/FooterTable"
@@ -12,6 +13,7 @@ import { DeleteFooterDialog } from "./components/DeleteFooterDialog"
 
 // Define all columns
 const allColumns: ColumnDefinition[] = [
+    { key: "backgroundColor", label: "Background Color" },
     { key: "logoUrl", label: "Logo" },
     { key: "companyName", label: "Company Name" },
     { key: "cin", label: "CIN" },
@@ -21,11 +23,15 @@ const allColumns: ColumnDefinition[] = [
     { key: "exportEmail", label: "Export Email" },
     { key: "socialMediaTitle", label: "Social Title" },
     { key: "socialMediaLinks", label: "Social Links" },
+    { key: "quickLinksTitle", label: "Quick Links Title" },
+    { key: "quickLinks", label: "Quick Links" },
+    { key: "copyrightText", label: "Copyright" },
     { key: "isActive", label: "Active" },
 ]
 
 export default function FooterDetailPage() {
     const { state, actions } = useFooterPage()
+    const { canCreate, canUpdate, canDelete } = usePermissionActions("footer-detail")
 
     return (
         <div className="flex flex-col gap-4 mx-4 auto">
@@ -41,9 +47,11 @@ export default function FooterDetailPage() {
                             selectedColumns={state.selectedColumns}
                             onColumnToggle={actions.handleColumnToggle}
                         />
+                        {canCreate && (
                         <Button onClick={actions.handleAddFooter}>
                             <Plus className="mr-2 h-4 w-4" /> Add Footer Detail
                         </Button>
+                        )}
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -56,6 +64,8 @@ export default function FooterDetailPage() {
                         onActiveToggle={actions.handleActiveToggle}
                         onEdit={actions.handleEdit}
                         onDelete={actions.handleDelete}
+                        canUpdate={canUpdate}
+                        canDelete={canDelete}
                     />
                 </CardContent>
             </Card>

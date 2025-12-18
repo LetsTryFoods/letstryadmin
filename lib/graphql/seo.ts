@@ -111,3 +111,91 @@ export const DELETE_SEO_CONTENT = gql`
     deleteSeoContent(id: $id)
   }
 `;
+
+// ============ SEO PAGES (Dynamic Page Options) ============
+
+export const GET_SEO_PAGES = gql`
+  query GetSeoPages {
+    seoPages {
+      _id
+      slug
+      label
+      description
+      sortOrder
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_ACTIVE_SEO_PAGES = gql`
+  query GetActiveSeoPages {
+    activeSeoPages {
+      _id
+      slug
+      label
+      description
+      sortOrder
+      isActive
+    }
+  }
+`;
+
+export const GET_SEO_PAGE = gql`
+  query GetSeoPage($id: ID!) {
+    seoPage(id: $id) {
+      _id
+      slug
+      label
+      description
+      sortOrder
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const CREATE_SEO_PAGE = gql`
+  mutation CreateSeoPage($input: CreateSeoPageInput!) {
+    createSeoPage(input: $input) {
+      _id
+      slug
+      label
+      description
+      sortOrder
+      isActive
+      createdAt
+    }
+  }
+`;
+
+export const UPDATE_SEO_PAGE = gql`
+  mutation UpdateSeoPage($id: ID!, $input: UpdateSeoPageInput!) {
+    updateSeoPage(id: $id, input: $input) {
+      _id
+      slug
+      label
+      description
+      sortOrder
+      isActive
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_SEO_PAGE = gql`
+  mutation DeleteSeoPage($id: ID!) {
+    deleteSeoPage(id: $id)
+  }
+`;
+
+export const TOGGLE_SEO_PAGE_ACTIVE = gql`
+  mutation ToggleSeoPageActive($id: ID!) {
+    toggleSeoPageActive(id: $id) {
+      _id
+      isActive
+    }
+  }
+`;

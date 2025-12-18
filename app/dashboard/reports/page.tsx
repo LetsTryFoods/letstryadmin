@@ -28,6 +28,7 @@ import {
   formatCurrency,
   formatCompactNumber
 } from "@/lib/reports/useReports"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month')

@@ -53,6 +53,8 @@ import CustomerDetailsDialog from "./CustomerDetailsDialog"
 interface CustomerTableProps {
   customers: Customer[]
   onRefresh: () => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 const statusConfig: Record<CustomerStatus, { label: string; variant: "default" | "secondary" | "destructive" }> = {
@@ -61,7 +63,7 @@ const statusConfig: Record<CustomerStatus, { label: string; variant: "default" |
   BLOCKED: { label: "Blocked", variant: "destructive" }
 }
 
-export default function CustomerTable({ customers, onRefresh }: CustomerTableProps) {
+export default function CustomerTable({ customers, onRefresh, canUpdate = true, canDelete = true }: CustomerTableProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -209,27 +211,28 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                          {customer.status !== 'ACTIVE' && (
+                          {canUpdate && <DropdownMenuSeparator />}
+                          {canUpdate && <DropdownMenuLabel>Change Status</DropdownMenuLabel>}
+                          {canUpdate && customer.status !== 'ACTIVE' && (
                             <DropdownMenuItem onClick={() => handleStatusChange(customer, 'ACTIVE')}>
                               <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
                               Mark Active
                             </DropdownMenuItem>
                           )}
-                          {customer.status !== 'INACTIVE' && (
+                          {canUpdate && customer.status !== 'INACTIVE' && (
                             <DropdownMenuItem onClick={() => handleStatusChange(customer, 'INACTIVE')}>
                               <XCircle className="mr-2 h-4 w-4 text-gray-600" />
                               Mark Inactive
                             </DropdownMenuItem>
                           )}
-                          {customer.status !== 'BLOCKED' && (
+                          {canUpdate && customer.status !== 'BLOCKED' && (
                             <DropdownMenuItem onClick={() => handleStatusChange(customer, 'BLOCKED')}>
                               <Ban className="mr-2 h-4 w-4 text-red-600" />
                               Block Customer
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuSeparator />
+                          {canDelete && <DropdownMenuSeparator />}
+                          {canDelete && (
                           <DropdownMenuItem 
                             onClick={() => handleDeleteCustomer(customer)}
                             className="text-red-600"
@@ -237,6 +240,7 @@ export default function CustomerTable({ customers, onRefresh }: CustomerTablePro
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Account
                           </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

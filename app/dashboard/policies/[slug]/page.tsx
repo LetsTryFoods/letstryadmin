@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePolicies, useCreatePolicy, useUpdatePolicy, useDeletePolicy } from '@/lib/policies/usePolicies'
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { policyFormSchema, PolicyFormValues } from '@/lib/validations/policy'
 import { WysiwygEditor } from '@/components/custom/wysiwyg-editor'
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,8 @@ export default function PolicyPage() {
   const { mutate: updatePolicy, loading: isUpdating } = useUpdatePolicy()
   const { mutate: deletePolicy } = useDeletePolicy()
   const isSubmitting = isCreating || isUpdating
+  
+  const { canUpdate, canDelete } = usePermissionActions("policies")
   
   const policies = (data as any)?.policies || []
   const existingPolicy = policies.find((p: any) => p.title === policyType)
@@ -185,19 +188,24 @@ export default function PolicyPage() {
               />
 
               <div className="flex justify-between pt-4">
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  onClick={() => setDeleteDialogOpen(true)}
-                  disabled={!policyId || isSubmitting}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Policy
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {policyId ? 'Update Policy' : 'Create Policy'}
-                </Button>
+                {canDelete && (
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    onClick={() => setDeleteDialogOpen(true)}
+                    disabled={!policyId || isSubmitting}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Policy
+                  </Button>
+                )}
+                {!canDelete && <div />}
+                {canUpdate && (
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {policyId ? 'Update Policy' : 'Create Policy'}
+                  </Button>
+                )}
               </div>
             </form>
           </Form>

@@ -16,6 +16,8 @@ interface FooterTableProps {
   onActiveToggle: (id: string, isActive: boolean) => void
   onEdit: (id: string) => void
   onDelete: (id: string, companyName: string) => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 export function FooterTable({
@@ -26,7 +28,9 @@ export function FooterTable({
   error,
   onActiveToggle,
   onEdit,
-  onDelete
+  onDelete,
+  canUpdate = true,
+  canDelete = true
 }: FooterTableProps) {
   if (loading) {
     return (
@@ -70,10 +74,22 @@ export function FooterTable({
               {selectedColumns.map(columnKey => (
                 <TableCell key={columnKey}>
                   {columnKey === 'isActive' ? (
+                    canUpdate ? (
                     <Switch
                       checked={footer.isActive}
                       onCheckedChange={() => onActiveToggle(footer._id, footer.isActive)}
                     />
+                    ) : (
+                      footer.isActive ? "Yes" : "No"
+                    )
+                  ) : columnKey === 'backgroundColor' ? (
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="h-6 w-6 rounded border"
+                        style={{ backgroundColor: footer.backgroundColor || '#1e293b' }}
+                      />
+                      <span className="text-xs text-muted-foreground">{footer.backgroundColor || '#1e293b'}</span>
+                    </div>
                   ) : columnKey === 'logoUrl' ? (
                     footer.logoUrl ? (
                       <img src={footer.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
@@ -110,6 +126,14 @@ export function FooterTable({
                         ))}
                       </div>
                     ) : '-'
+                  ) : columnKey === 'quickLinks' ? (
+                    footer.quickLinks?.length > 0 ? (
+                      <span className="text-sm">{footer.quickLinks.length} links</span>
+                    ) : '-'
+                  ) : columnKey === 'copyrightText' ? (
+                    <div className="max-w-[200px] truncate" title={footer.copyrightText}>
+                      {footer.copyrightText || '-'}
+                    </div>
                   ) : (
                     String(footer[columnKey as keyof typeof footer] || '-')
                   )}
@@ -125,11 +149,14 @@ export function FooterTable({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    {canUpdate && (
                     <DropdownMenuItem onClick={() => onEdit(footer._id)}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    )}
+                    {(canUpdate || canDelete) && <DropdownMenuSeparator />}
+                    {canDelete && (
                     <DropdownMenuItem 
                       onClick={() => onDelete(footer._id, footer.companyName)}
                       className="text-destructive"
@@ -137,6 +164,7 @@ export function FooterTable({
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
                     </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

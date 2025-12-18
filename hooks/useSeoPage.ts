@@ -40,6 +40,7 @@ export function useSeoPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [seoToDelete, setSeoToDelete] = useState<SeoContent | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isPageDialogOpen, setIsPageDialogOpen] = useState(false);
 
   // API Hooks
   const { data, loading, error, refetch } = useSeoContents({
@@ -158,6 +159,7 @@ export function useSeoPage() {
       searchTerm,
       currentPage,
       pageSize,
+      isPageDialogOpen,
     },
     // Actions
     actions: {
@@ -173,6 +175,7 @@ export function useSeoPage() {
       setIsFormOpen,
       setDeleteDialogOpen,
       setSearchTerm,
+      setIsPageDialogOpen,
     },
     // Constants
     allColumns: ALL_COLUMNS,

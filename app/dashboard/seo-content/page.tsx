@@ -10,11 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Search, Globe, FileText } from "lucide-react";
+import { Plus, Search, Globe, FileText, Settings } from "lucide-react";
 import { useSeoPage } from "@/hooks/useSeoPage";
 import { SeoForm } from "./components/SeoForm";
 import { SeoTable } from "./components/SeoTable";
 import { DeleteSeoDialog } from "./components/DeleteSeoDialog";
+import { SeoPageDialog } from "./components/SeoPageDialog";
 import { ColumnSelector } from "@/app/dashboard/components/column-selector";
 import { Pagination } from "@/app/dashboard/components/pagination";
 import { SeoContentFormData } from "@/lib/validations/seo.schema";
@@ -43,10 +44,16 @@ export default function SeoContentPage() {
             Manage SEO metadata for all pages of your website
           </p>
         </div>
-        <Button onClick={() => actions.setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add SEO Entry
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => actions.setIsPageDialogOpen(true)}>
+            <Settings className="mr-2 h-4 w-4" />
+            Manage Pages
+          </Button>
+          <Button onClick={() => actions.setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add SEO Entry
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -167,6 +174,12 @@ export default function SeoContentPage() {
         seoContent={state.seoToDelete}
         onConfirm={actions.handleDelete}
         isDeleting={state.deleting}
+      />
+
+      {/* Manage SEO Pages Dialog */}
+      <SeoPageDialog
+        open={state.isPageDialogOpen}
+        onOpenChange={actions.setIsPageDialogOpen}
       />
     </div>
   );

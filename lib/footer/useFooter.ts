@@ -10,48 +10,89 @@ import {
 export interface SocialMediaLink {
   platform: string
   url: string
-  iconUrl: string
+  iconUrl?: string
+}
+
+export interface QuickLink {
+  label: string
+  url: string
+  order: number
+  isActive: boolean
 }
 
 export interface FooterDetail {
   _id: string
-  logoUrl: string
+  // Styling
+  backgroundColor?: string
+  textColor?: string
+  linkColor?: string
+  linkHoverColor?: string
+  // Logo
+  logoUrl?: string
+  // Social Media Section
+  socialMediaTitle?: string
+  socialMediaLinks?: SocialMediaLink[]
+  // Quick Links Section
+  quickLinksTitle?: string
+  quickLinks?: QuickLink[]
+  // Contact Section
+  contactTitle?: string
   companyName: string
-  cin: string
+  cin?: string
   address: string
   email: string
   phone: string
-  exportEmail: string
-  socialMediaTitle: string
-  socialMediaLinks: SocialMediaLink[]
+  exportEmailLabel?: string
+  exportEmail?: string
+  // Copyright
+  copyrightText?: string
+  // Status
   isActive: boolean
   createdAt: string
   updatedAt: string
 }
 
 export interface CreateFooterDetailInput {
+  backgroundColor?: string
+  textColor?: string
+  linkColor?: string
+  linkHoverColor?: string
   logoUrl?: string
+  socialMediaTitle?: string
+  socialMediaLinks?: SocialMediaLink[]
+  quickLinksTitle?: string
+  quickLinks?: QuickLink[]
+  contactTitle?: string
   companyName: string
-  cin: string
+  cin?: string
   address: string
   email: string
   phone: string
+  exportEmailLabel?: string
   exportEmail?: string
-  socialMediaTitle?: string
-  socialMediaLinks?: SocialMediaLink[]
+  copyrightText?: string
   isActive?: boolean
 }
 
 export interface UpdateFooterDetailInput {
+  backgroundColor?: string
+  textColor?: string
+  linkColor?: string
+  linkHoverColor?: string
   logoUrl?: string
+  socialMediaTitle?: string
+  socialMediaLinks?: SocialMediaLink[]
+  quickLinksTitle?: string
+  quickLinks?: QuickLink[]
+  contactTitle?: string
   companyName?: string
   cin?: string
   address?: string
   email?: string
   phone?: string
+  exportEmailLabel?: string
   exportEmail?: string
-  socialMediaTitle?: string
-  socialMediaLinks?: SocialMediaLink[]
+  copyrightText?: string
   isActive?: boolean
 }
 

@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useCoupons, useDeleteCoupon, Coupon } from "@/lib/coupons/useCoupons"
+import { usePermissionActions } from "@/lib/rbac/AuthContext"
 import { CouponForm } from "./components/CouponForm"
 import {CouponTable} from "./components/CouponTable"
 import { Plus, Search, RefreshCw, Ticket, TicketPercent, TicketX } from "lucide-react"
@@ -34,6 +35,8 @@ export default function CouponsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+
+  const { canCreate, canUpdate, canDelete } = usePermissionActions("coupons")
 
   const coupons: Coupon[] = (data as any)?.coupons || []
 
@@ -123,10 +126,12 @@ export default function CouponsPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
+          {canCreate && (
           <Button onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-2" />
             Create Coupon
           </Button>
+          )}
         </div>
       </div>
 
@@ -186,6 +191,7 @@ export default function CouponsPage() {
           <CouponTable
             coupons={filteredCoupons}
             onDelete={handleDelete}
+            canDelete={canDelete}
           />
         </CardContent>
       </Card>
