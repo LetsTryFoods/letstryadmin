@@ -14,7 +14,6 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Mail,
   Phone,
   MapPin,
   Calendar,
@@ -96,10 +95,6 @@ export default function CustomerDetailsDialog({
               <div>
                 <h3 className="text-xl font-semibold">{customer.name}</h3>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                  <Mail className="h-4 w-4" />
-                  {customer.email}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Phone className="h-4 w-4" />
                   {customer.phone}
                 </div>

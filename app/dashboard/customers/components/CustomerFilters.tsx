@@ -183,6 +183,7 @@ export default function CustomerFilters({
                   <Input
                     type="date"
                     {...field}
+                    max={form.watch("endDate") || undefined}
                     onChange={(e) => {
                       field.onChange(e);
                       onFilterChange(form.getValues());
@@ -203,6 +204,7 @@ export default function CustomerFilters({
                   <Input
                     type="date"
                     {...field}
+                    min={form.watch("startDate") || undefined}
                     onChange={(e) => {
                       field.onChange(e);
                       onFilterChange(form.getValues());

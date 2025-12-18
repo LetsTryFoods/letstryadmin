@@ -61,10 +61,11 @@ export const CREATE_COUPON = gql`
 `
 
 export const DELETE_COUPON = gql`
-  mutation DeleteCoupon($id: ID!) {
+  mutation DeleteCoupon($id: String!) {
     deleteCoupon(id: $id) {
       _id
       name
+      code
     }
   }
 `

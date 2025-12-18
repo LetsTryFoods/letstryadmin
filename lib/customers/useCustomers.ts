@@ -36,7 +36,7 @@ export interface Customer {
   email: string;
   phone: string;
   avatar?: string;
-  status: CustomerStatus;
+  status: string;
   totalOrders: number;
   totalSpent: number;
   activeCartItemsCount?: number;
@@ -105,7 +105,7 @@ const mapBackendCustomerToFrontend = (backendCustomer: any): Customer => {
       }`.trim() || "Guest User",
     email: backendCustomer.email || "",
     phone: backendCustomer.displayPhone || backendCustomer.phoneNumber || "",
-    status: backendCustomer.status.toUpperCase() as CustomerStatus,
+    status: backendCustomer.status,
     totalOrders: backendCustomer.totalOrders || 0,
     totalSpent: backendCustomer.totalSpent || 0,
     activeCartItemsCount: backendCustomer.activeCartItemsCount,

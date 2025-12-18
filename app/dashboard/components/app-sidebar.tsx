@@ -50,11 +50,11 @@ const items = [
     url: "/dashboard/categories",
     icon: FolderTree,
   },
-  {
-    title: "Address",
-    url: "/dashboard/address",
-    icon: Truck,
-  },
+  // {
+  //   title: "Address",
+  //   url: "/dashboard/address",
+  //   icon: Truck,
+  // },
   {
     title: "SEO Content",
     url: "/dashboard/seo-content",

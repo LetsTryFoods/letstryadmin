@@ -38,7 +38,6 @@ import {
   MoreHorizontal,
   Trash2,
   Phone,
-  Mail,
   ShoppingCart,
 } from "lucide-react";
 import { Customer, useDeleteCustomer } from "@/lib/customers/useCustomers";
@@ -121,38 +120,27 @@ export default function CustomerTable({
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar>
-                          {customer.avatar ? (
-                            <img src={customer.avatar} alt={customer.name} />
-                          ) : (
-                            <AvatarFallback>
-                              {getInitials(customer.name)}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="font-medium">{customer.name}</p>
-                            {customer.isGuest && (
+                            {customer.isGuest ? (
                               <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
                                 Guest
                               </Badge>
-                            )}
+                            ) : customer.status === "REGISTERED" ? (
+                              <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs">
+                                Registered
+                              </Badge>
+                            ) : null}
                           </div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="space-y-1">
-                        <p className="text-sm flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          {customer.email}
-                        </p>
-                        <p className="text-sm flex items-center gap-1 text-muted-foreground">
-                          <Phone className="h-3 w-3" />
-                          {customer.phone}
-                        </p>
-                      </div>
+                      <p className="text-sm flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {customer.phone}
+                      </p>
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="font-medium">

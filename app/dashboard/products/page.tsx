@@ -79,6 +79,7 @@ export default function ProductsPage() {
   const [selectedColumns, setSelectedColumns] = useState([
     "name",
     "brand",
+    "categoryName",
     "favourite",
     "isArchived",
   ]);
@@ -325,8 +326,16 @@ export default function ProductsPage() {
                                 }
                               />
                             ) : columnKey === "categoryName" ? (
-                              product?.category?.name && (
-                                <span className="text-muted-foreground">{product.category.name}</span>
+                              product.categories && product.categories.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {product.categories.map((category: any) => (
+                                    <span key={category.id} className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+                                      {category.name}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
                               )
                             ) : columnKey === "isVegetarian" ||
                               columnKey === "isGlutenFree" ? (

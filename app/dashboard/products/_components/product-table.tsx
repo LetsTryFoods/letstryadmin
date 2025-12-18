@@ -193,6 +193,18 @@ export function ProductTable({
                               )
                             ) : columnKey === "defaultVariant" ? (
                               defaultVariant?.sku || "-"
+                            ) : columnKey === "categoryIds" ? (
+                              product.categories && product.categories.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {product.categories.map((category: any) => (
+                                    <Badge key={category.id} variant="secondary" className="text-xs">
+                                      {category.name}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )
                             ) : columnKey === "isVegetarian" ||
                               columnKey === "isGlutenFree" ? (
                               product[columnKey as keyof Product] ? (

@@ -70,7 +70,7 @@ export const GET_PRODUCTS = gql`
         favourite
         createdAt
         updatedAt
-        category {
+        categories {
           id
           name
           slug
@@ -168,7 +168,7 @@ export const GET_PRODUCT = gql`
       favourite
       createdAt
       updatedAt
-      category {
+      categories {
         id
         name
         slug
@@ -218,7 +218,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
       favourite
       createdAt
       updatedAt
-      category {
+      categories {
         id
         name
         slug
