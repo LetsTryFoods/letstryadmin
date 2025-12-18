@@ -386,6 +386,7 @@ export const ADMIN_USER_LOGIN = gql`
         slug
         name
         module
+        sortOrder
         actions
       }
     }
